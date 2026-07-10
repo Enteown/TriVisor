@@ -1,0 +1,104 @@
+/* Styling part */
+button.long_size {
+	background-color: var(--button-background-color);
+	color: var(--button-text-color);
+	border: 3px solid transparent; /* No border at first */
+	margin: 2px;
+	padding: 6px;
+	border-radius: 8px;
+	font-weight: 600;
+	transition: border-color 0.3s ease, filter 0.2s ease;
+}
+button.long_size:focus {
+  border-color: var(--button-active-color); /* Colored border shows on click */
+  outline: none;
+}
+div.top_content {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+}
+div.top_content > img#shortcut_icon {
+	position: relative;
+	bottom: 6px;
+	left: 3px;
+	width: 24px;
+	height: 24px;
+	border-radius: 7px;
+	font-size: 0; /* Hides the alternative text */
+	object-fit: contain;
+	object-position: center;
+}
+div.top_content > input#address_bar {
+	position: relative;
+	right: 3px;
+	flex: 1;
+	text-overflow: ellipsis;
+	overflow-x: auto;
+	white-space: nowrap;
+	text-align: start; /* Respects direction, not hardcoded left/right */
+	unicode-bidi: plaintext; /* Handles mixed LTR+RTL */
+	min-width: 0;
+	padding-right: 12px;
+}
+div.top_content > button#go {
+	position: absolute;
+	right: 9px;
+	top: 15px;
+	background: var(--secondary-color);
+	border: 2px solid transparent; /* No border at first */
+	border-radius: 50%;
+	width: 18px;
+	height: 18px;
+	transition: ease 0.3s;
+	transform: translateY(-50%);
+}
+div.top_content > button#go > img {
+	position: relative;
+	top: 1px;
+}
+div.bottom_content {
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+	height: 50px;
+	background-color: var(--secondary-color);
+}
+div.bottom_content > button {
+	position: relative;
+	top: 5px;
+	left: 14px;
+	border: 2px solid transparent; /* No border at first */
+	margin: 4px;
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	transition: ease 0.3s;
+	background: var(--primary-color);
+}
+div.bottom_content > button > img {
+	position: relative;
+	width: 18px;
+	height: 18px;
+	top: 2px;
+}
+
+/* Separated common parts */
+div.top_content > button#go:focus, div.bottom_content > button:focus {
+	border-color: var(--active-color);
+}
+button.long_size:disabled, div.bottom_content > button:disabled {
+	opacity: 45%;
+	cursor: not-allowed;
+}
+
+
+/* Coloring part (Automatic detection of Dark/Light scheme) */
+/* Deprecated: Acode already included various color types, according to theme management, so we likely dispose old plan */
+@media (prefers-color-scheme: dark) {
+	/* Our SVG button icon color flip */
+	div.top_content > button#go > img, div.bottom_content > button > img {
+		filter: invert(100%); /* Turns black icon completely to pure white in Dark */
+	}
+}
