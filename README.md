@@ -9,6 +9,7 @@ __A mini, but useful extension built to fold same-origin navigation.__
 ### __Automatic__
 __Launch Acode application, open *Extensions* panel and search for, then install it.__
 
+> [!NOTE]
 > __Wait for this, until being available on store in no time.__
 
 ### __Manual__
@@ -50,7 +51,6 @@ zip -r "/sdcard/Download/$(basename $(pwd))-$(date '+%Y%m%d-%H%M%S').zip" "."
 ## __Contributors__
 - __Ship Lead:__ *Me* __&#x1F90E;__
 - __Co-Dev:__ *Meta AI* __&#x1F49C;__ *+ Gemini* __(taken little help)__
-
 
 
 <p align="center">We're on mission to bring peace in our planet &#x1F680;</p>
