@@ -36,7 +36,7 @@ cd "TriVisor"
 
 - __At last, paste and hit enter, then checkout files:__
 ```bash
-zip -r "/sdcard/Download/$(basename $(pwd))-$(date '+%Y%m%d-%H%M%S').zip" "."
+zip -r "/sdcard/Download/$(basename $(pwd))-$(date '+%Y%m%d-%H%M%S').zip" "." -x ".git/*"
 ```
 - __If everything goes alright, tap on the `+` icon, select local source, browse for, then open that archive.__
 
