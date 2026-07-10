@@ -1,0 +1,17 @@
+{
+	"id": "null.plugin.iframe",
+	"name": "TriVisor IFrame Browser",
+	"version": "1.0",
+	"icon": "img/icon.png",
+	"main": "src/main.js",
+	"changelogs": "CHANGELOG.md",
+	"readme": "README.md",
+	"license": "MIT",
+	"minVersionCode": 290,
+	"repository": "https://www.github.com/Enteown/TriVisor",
+	"keywords": ["Browser", "Chromium", "Internet", "WebView"],
+	"author": {
+		"name": "Null",
+		"github": "Enteown"
+	}
+}
