@@ -5,42 +5,100 @@
 
 
 
-// Shhhh...
+// Never underestimate my power!
 "use strict";
 
-// Let's go!
+// Notice (Loziya-included): Recycled code snippets from an unreleased library.
+
+// *** Polyfills A.G.: Backward compatibility supported, works even on: Android 7 (Nougat)
+// Tip: Negative integers can be used as descending indexes.
+if (! ("at" in [])) Object.defineProperty(Array.prototype, "at", {
+	"value": function (index) {
+		if (index < 0) index += this.length;
+		return this[index];
+	},
+	"writable": true,
+	"configurable": true
+});
+
+// Tip: URL validity checker.
+if (! ("canParse" in URL)) URL.canParse = (url, base) => {
+	try {
+		new URL(url, base);
+		return true;
+	} catch {
+		// Hate bad blocks, still.
+		return false;
+	};
+};
+
+// *** Helpers: Injected, those are sustainable, easy-to-use and bug proof.
+// Tip: HTML coordinated DOM selector.
+Object.assign(document, {
+	"indexRoot": null,
+	"getElementByOrderedIndex": function (...sequence) {
+		let container = this.indexRoot, currentChild;
+
+		if (! (container instanceof Element)) throw new TypeError("Invalid root: expected standard element, but got: " + getType(container));
+		return sequence.reduce((content, index) => {
+			// Now it can even grab the last one.
+			// News: Removed legacy allowlist.
+			currentChild = content.children;
+
+			if (index < 0 || index >= currentChild.length) throw new RangeError("Indexing is out of bounds, faulty argument: " + index);
+			return currentChild[index];
+		}, container);
+	}
+});
+
+// Tip: Very accurate, variable type checker.
+function getType(value) {
+	// Successor of its ancestors.
+	return Object.prototype.toString.call(value).slice(8, -1);
+};
+
+// Tip: Link verifier + auto-correct feature.
+function normalizeURI(uri, realpath = "") {
+	if (typeof uri !== "string" || ! uri) return "";
+
+	// Convert unsafe backslashes to forward slashes.
+	uri = uri.split(/([?#].*)/).map((part, index) => index === 0 ? part.replace(/\\/g, "/") : part).join("");
+
+	// Something allowed, others denied according to available supports.
+	const schemes = ["about", "data", "javascript"], protocols = ["file", "http", "https"];
+
+	// Special schemes will pass through.
+	if (schemes.some(item => uri.toLowerCase().startsWith(item + ":"))) return uri.split(":")[1] ? uri : "";
+
+	// Handle Windows drive letters with Linux filesystem structure, thanks later.
+	if (uri.startsWith("/") || /^[a-zA-Z]:\//.test(uri)) uri = "file:///" + uri.replace(/^\/+/, "");
+
+	// Look for existing protocol, or concatenate that legacy one.
+	if (! protocols.includes(uri.match(/^([a-z][a-z0-9+.-]*):\/\//i)?.[1].toLowerCase())) uri = "https://" + uri;
+
+	try {
+		// The ultimate solution.
+		const property = new URL(uri), [, pathname, query, hash] = realpath.match(/^([^?#]*)(\?[^#]*)?(#.*)?$/);
+
+		if (/^(?!.*\.\.)[a-zA-Z0-9\-._~!$&'()*+,;=:@%\/]+$/.test(pathname)) property.pathname += (! (property.pathname.endsWith("/") || realpath.startsWith("/")) ? "/" : "") + pathname;
+		if (query) property.search = query;
+		if (hash) property.hash =  hash;
+		return property.href;
+	} catch {
+		// No normal text traversal should survive.
+		return "";
+	};
+};
+
+
+
+// Keep your room clean.
 (() => {
-	// Polyfill: works back to: Android 7
-	if (! URL.hasOwnProperty("canParse")) Object.defineProperty(URL, "canParse", {
-		"value": function (Url, baseUrl) {
-			try {
-				// The ultimate solution.
-				new URL(Url, baseUrl);
-
-				return true;
-			} catch {
-				return false;
-			};
-		},
-		"writable": true,
-		"enumerable": true,
-		"configurable": true
-	});
-
-	// Capture exact photocopy of all required tools.
+	// Capture exact photocopy of all required items.
 	const exports = {
 		"domCache": {
-			"isDefined": false
-		},
-		"googleLite": {
-			"title": "Google Search",
-			"Url": "https://www.google.com/webhp?igu=1"
-		},
-		"guardOpts": {
-			"childList": true, // Capture ordered spawn.
-			"subtree": true, // Icons are not direct children of page.
-			"attributes": true, // Inspect all class toggles.
-			"attributeFilter": ["class"] // Keep it very cheap.
+			"isDefined": false,
+			"menuBtn": document.querySelector("span.icon.menu[action='toggle-sidebar']")
 		},
 		"packageId": (() => {
 			// Build folder path, then cut out the name of target.
@@ -49,114 +107,144 @@
 			// Pack up to take our newly cooked hot equipment.
 			return parts.at(parts.indexOf("plugins") + 1);
 		})(),
-		"recentTabs": new Proxy(new Map(), {
-			get (target, operation, receiver) {
-				// Block those dangerous ones first.
+		"totalTabs": new Proxy(new Map(), {
+			get(target, operation, receiver) {
+				// We need your interactions here:
+				const boundMethods = ["clear", "delete", "set"];
+
+				// What is dangerous here, huh?
 				// We wanna intercept you all:
-				if (["clear", "delete", "set"].includes(operation)) return function (...args) {
+				if (boundMethods.includes(operation)) return (...args) => {
 					// Act hot.
 					Map.prototype[operation].apply(target, args);
 
 					// A-Memorize!
-					settings("recentTabs").access(Array.from(target.keys()));
+					exports.recentTabs.access([...target.keys()]);
 
 					// Grant for chaining.
 					return receiver;
 				};
 
 				// Fix: Handle getters specifically.
-				if (operation == "size") return target.size;
+				if (operation === "size") return target.size;
 
 				// Others should be triggered originally.
 				const value = Reflect.get(target, operation, receiver);
 
 				// If it's a method, connect it to mainline.
-				if (typeof value == "function") return value.bind(target);
-
+				if (typeof value === "function") return value.bind(target);
 				return value;
 			}
 		})
-	}, config = acode.require("settings"),
+	},
 
 	// Better to perform shortcut binding, will provide design agility.
-	Alert = acode.require("alert"), Confirm = acode.require("confirm"), Prompt = acode.require("prompt"), Sidebar = acode.require("sidebarApps"), Toast = acode.require("toast"), PanelGuard = new MutationObserver(parameters => {
-		// Watch carefully except trivial matters.
-		for (const identifier of parameters) {
-			// Case: Class moved to another node -> check if it was our icon.
-			if (identifier.type == "attributes" && identifier.target.matches(exports.btnName) && identifier.target.classList.contains("active")) {
-				updateControlStates();
-				break;
-			};
-
-			// Case: Capture element when got injected/removed.
-			if (identifier.type == "childList" && document.querySelector(exports.btnName)?.classList.contains("active")) {
-				updateControlStates();
-				break;
-			};
-		};
-	});
+	Sidebar = acode.require("sidebarApps"), Toast = acode.require("toast"),
 
 	// We must preserve your progress safely.
-	function settings(key, isPersistent = false) {
-		// Punish if user mess with normal operations.
-		if (typeof key != "string" || key.length == 0) throw new Error("Subject must be valid with plain contents.");
+	_config = acode.require("settings"),
 
-		// Real successor of its ancestor.
-		function getType(value) {
-			return Object.prototype.toString.call(value).slice(8, -1);
-		};
+	// Magic words to write database in disk space.
+	_save = section => _config.update({
+		// It'll accomplish mission silently.
+		[exports.packageId]: section
+	}, false),
+
+	// Watcher for menu toggles.
+	_interactionWatcher = () => setTimeout(() => document.querySelector(exports.toolAttrs).classList.contains("active") && updateControlStates());
+
+	// *** Removed: Watcher which rises heavy process usage.
+
+	// Hijacking plan cancelled, activating beast mode.
+	// Get a tasty fork...
+	URL.join = (that => that.join.bind(that))(acode.require("Url"));
+
+	// The evolution counterpart...
+	function $config(key, isPersistent = false) {
+		// Punish if user mess with normal operations.
+		if (typeof key !== "string" || ! key) throw new Error("Subject must be valid with plain text.");
+
+		// Take a reference if possible.
+		let section = _config.value[exports.packageId];
 
 		// Didn't find yourself? Feel free to reserve a seat.
-		if (getType(config.value[exports.packageId]) != "Object") config.value[exports.packageId] = new Object();
+		if (getType(section) !== "Object") section = _config.value[exports.packageId] = {};
 
-		// Magic words to write database in disk space.
-		function save() {
-			// It'll accomplish mission silently.
-			config.update({
-				[exports.packageId]: config.value[exports.packageId]
-			}, false);
+		// Persistent scoped helpers that'll handover my personal assistant.
+		return {
+			"access": (value, afterSave, ...args) => {
+				// Gather old things.
+				const content = isPersistent ? section[key] : localStorage.getItem(key);
+
+				// Replace the target selection when needed.
+				if (typeof value !== "undefined") {
+					// Tip: Brat protection armor equipped.
+					if (! (["Array", "Boolean", "Null", "Object", "String"].includes(getType(value)) || Number.isFinite(value))) value = null;
+					if (isPersistent) {
+						// Push into it.
+						section[key] = value;
+
+						// Z-Memorize!
+						_save(section);
+					} else localStorage.setItem(key, JSON.stringify(value));
+
+					// Callback when someone asks for.
+					if (typeof afterSave === "function") afterSave.apply(null, args);
+				};
+
+				// Sure?
+				if (typeof content === "undefined" || (! isPersistent && typeof content === "object")) return;
+
+				// Hey, send it.
+				return isPersistent ? content : JSON.parse(content);
+			},
+			"purge": () => {
+				if (! isPersistent) return localStorage.removeItem(key);
+				if (section.hasOwnProperty(key)) {
+					delete section[key];
+					_save(section);
+				};
+			}
 		};
-
-		// Tools that'll handover my personal assistant.
-		function purge() {
-			if (! isPersistent) localStorage.removeItem(key);
-			else if (config.value[exports.packageId].hasOwnProperty(key)) {
-				delete config.value[exports.packageId][key];
-				save();
-			};
-		};
-		function access(value) {
-			// Gather old things.
-			const content = isPersistent ? config.value[exports.packageId][key] : localStorage.getItem(key);
-
-			// Replace the target selection if exists.
-			if (typeof value != "undefined") {
-				// News: Brat protection armor equipped.
-				if (! (["Array", "Boolean", "Null", "Object", "String"].includes(getType(value)) || Number.isFinite(value))) value = null;
-				if (isPersistent) {
-					// Push into it.
-					config.value[exports.packageId][key] = value;
-
-					// Z-Memorize!
-					save();
-				} else localStorage.setItem(key, JSON.stringify(value));
-			};
-
-			// Sure?
-			if (typeof content == "undefined" || (! isPersistent && getType(content) == "Null")) return void 0;
-
-			// Hey, send it.
-			else return isPersistent ? content : JSON.parse(content);
-		};
-
-		// The persistent scoped helpers.
-		return { access, purge };
 	};
 
 	// Written for adding tabs.
 	function createTab(title, link) {
 		// Create brand new product.
-		const Viewer = document.createElement("iframe");
+		const Viewer = document.createElement("iframe"), redirectorBlueprint = Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype, "src");
+
+		// Sew a personal diary for marking already visited links.
+		Viewer.browsingHistory = Object.assign([link], {
+			"navigate": function (action) {
+				this.guidedRedirection = true;
+
+				if (action === "back" && this.currentIndex > 0) -- this.currentIndex;
+				if (action === "forward" && this.currentIndex < this.length - 1) ++ this.currentIndex;
+				if (action !== "reload") console.info("Navigation boundary reached in that direction, don't try to go further.");
+
+				Viewer.src = (src => action === "reload" ? (bust => bust + (bust.includes("?") ? "&" : "?") + "t=" + Date.now())(src.replace(/([?&])t=\d+/g, "").replace(/[?&]$/, "")) : src)(this[this.currentIndex]);
+			},
+			"currentIndex": 0,
+			"guidedRedirection": true
+		});
+
+		// Mutate its infrastructure for detecting link elevations.
+		Object.defineProperty(Viewer, "src", {
+			get() {
+				return redirectorBlueprint.get.call(this);
+			},
+			set(src) {
+				redirectorBlueprint.set.call(this, src);
+
+				if (this.browsingHistory.guidedRedirection) this.browsingHistory.guidedRedirection = false;
+				else {
+					for (let n = this.browsingHistory.length - 1; n > this.browsingHistory.currentIndex; n--) this.browsingHistory.pop();
+
+					this.browsingHistory.push(src);
+					++ this.browsingHistory.currentIndex;
+				};
+			}
+		});
 
 		// Give illegal birth to dummy "New File" tab handle.
 		acode.newEditorFile(title, {
@@ -164,7 +252,48 @@
 			"hideQuickTools": true
 		});
 
-		// Configure necessary settings.
+		// Configure necessary options.
+		Viewer.allow = `
+			ch-ua-full-version-list;
+			ch-ua-arch;
+			ch-prefers-reduced-transparency;
+			deferred-fetch;
+			ch-save-data;
+			deferred-fetch-minimal;
+			ch-downlink;
+			ch-ua-form-factors;
+			ch-ua;
+			ch-ua-model;
+			ch-ect;
+			autoplay;
+			ch-ua-platform-version;
+			ch-viewport-height;
+			ch-ua-platform;
+			ch-ua-full-version;
+			aria-notify;
+			ch-ua-high-entropy-values;
+			ch-width;
+			ch-prefers-reduced-motion;
+			encrypted-media;
+			ch-rtt;
+			ch-ua-mobile;
+			unload;
+			ch-dpr;
+			ch-prefers-color-scheme;
+			ch-ua-wow64;
+			attribution-reporting;
+			fullscreen;
+			private-state-token-redemption;
+			ch-ua-bitness;
+			sync-xhr;
+			ch-device-memory;
+			ch-viewport-width;
+			picture-in-picture;
+			clipboard-write;
+		`;
+		Viewer.id = editorManager.activeFile.id;
+		Viewer.loading = "lazy";
+		Viewer.src = link;
 		Viewer.style.cssText = `
 			position: absolute;
 			border: none;
@@ -175,11 +304,9 @@
 			z-index: 9999;
 			background-color: white;
 		`;
-		Viewer.id = editorManager.activeFile.id;
-		Viewer.src = link;
 
 		// Push it inside the box.
-		exports.recentTabs.set(Viewer.id, Viewer);
+		exports.totalTabs.set(Viewer.id, Viewer);
 		editorManager.container.appendChild(Viewer);
 
 		// Fix: Since "Acode" auto-switches to the tab on creation,
@@ -187,175 +314,311 @@
 		// So, not covering up by default.
 	};
 
+	// Written for generating full code piece.
+	function insertSavedWebTile(title, url) {
+		if (! exports.domCache.ghostText.hidden) {
+			exports.domCache.sitesTileContainer.style.display = "block";
+			exports.domCache.ghostText.hidden = true;
+		};
+
+		const item = document.createElement("li"), delIcon = document.createElement("span"), goIcon = document.createElement("span");
+
+		item.className = "list-item";
+		item.innerHTML = `
+			<div>
+				<span class="icon public"></span>
+				<div>
+					<span>${title}</span>
+					<small>${url}</small>
+				</div>
+			</div>
+		`;
+		delIcon.dataset.action = goIcon.dataset.action = "manage-bookmarks";
+		delIcon.className = "icon delete";
+		goIcon.className = "icon forward";
+		delIcon.onclick = async () => {
+			if (await acode.confirm("WARNING", "Think at least thrice, remove this one?")) {
+				item.remove();
+
+				delete exports.bookmarkList[url];
+				if (! Object.keys(exports.bookmarkList).length) {
+					exports.domCache.sitesTileContainer.style.display = "none";
+					exports.domCache.ghostText.hidden = false;
+				};
+			};
+		};
+		goIcon.onclick = () => {
+			exports.docPage.hide();
+			exports.domCache.activeTab.src = url;
+		};
+
+		item.append(goIcon, delIcon);
+
+		return item;
+	};
+
 	// Everytime this panel must be updated when we need it.
-	function updateControlStates() {
-		// Tactics died, huh, we're now implementing our old techniques.
+	function updateControlStates(container) {
+		// Tactics died, huh... We're implementing our old techniques.
 		if (! exports.domCache.isDefined) {
+			// Hook a shortcut for walking less.
+			document.indexRoot = container;
+
 			// Touch longest swiftness.
 			Object.assign(exports.domCache, {
-				"favicon": document.querySelector("img#shortcut_icon"),
-				"textBox": document.querySelector("input#address_bar"),
-				"go": document.querySelector("button#go"),
-				"hpChanger": document.querySelector("button#change_hpinfo"),
-				"openBrowser": document.querySelector("button#open_browser"),
-				"resetAll": document.querySelector("button#reset_defaults"),
-				"add": document.querySelector("button#add"),
-				"reload": document.querySelector("button#reload"),
-				"back": document.querySelector("button#back"),
-				"forward": document.querySelector("button#forward")
+				"favicon": document.getElementByOrderedIndex(1, 0, 0),
+				"addressbar": document.getElementByOrderedIndex(1, 1),
+				"go": document.getElementByOrderedIndex(1, 2),
+				"pageChanger": document.getElementByOrderedIndex(3),
+				"browseCopied": document.getElementByOrderedIndex(4),
+				"showSavedSites": document.getElementByOrderedIndex(5),
+				"add": document.getElementByOrderedIndex(6, 0),
+				"reload": document.getElementByOrderedIndex(6, 1),
+				"back": document.getElementByOrderedIndex(6, 2),
+				"forward": document.getElementByOrderedIndex(6, 3),
+				"openBrowser": document.getElementByOrderedIndex(6, 4)
 			});
 
-			// Determiners for what jobs should those components perform.
-			exports.domCache.favicon.onerror = () => exports.domCache.favicon.src = exports.defWebIco;
-			exports.domCache.go.onclick = () => exports.domCache.activeTab.src = exports.domCache.textBox.value.trim().length == 0 ? "about:blank" : exports.domCache.textBox.value;
-			exports.domCache.hpChanger.onclick = async () => {
-				const hpInf = exports.hpInf.access(), title = await Prompt("Give the name of website:", hpInf.title), Url = await Prompt("Paste your custom start link:", hpInf.Url);
+			// Set-up our sandboxed DOM.
+			document.indexRoot = exports.docPage;
+			document.getElementByOrderedIndex(0, 1).innerText = "Saved Sites";
+			exports.docPage.innerHTML = `
+				<div class="segmented-control">
+					<button class="long-size">Save current site for later</button>
+				</div>
+				<hr/>
+				<ul class="list scroll inner-section"></ul>
+				<hr/>
+				<h1 class="zeno-state">Nothing to show.</h1>
+			`;
+			exports.domCache.sitesTileContainer = document.getElementByOrderedIndex(1, 2);
+			exports.domCache.ghostText = document.getElementByOrderedIndex(1, 4);
 
-				if (Boolean(title?.length) && URL.canParse(Url)) {
-					exports.hpInf.access({
-						"title": title,
-						"Url": Url
-					});
-					Toast("Start page updated successfully.");
-				} else Alert("ERROR", "Normal text in link and empty name isn't supported and never would be.");
+			// Determiners for what jobs should those components perform.
+			exports.domCache.favicon.onerror = function () {
+				this.hidden = true;
+				this.parentNode.classList.add("public");
+			};
+			exports.domCache.go.onclick = () => exports.domCache.activeTab.src = normalizeURI(exports.domCache.addressbar.value) || "about:blank";
+			exports.domCache.pageChanger.onclick = async () => {
+				let { title, url } = exports.homepage.access();
+
+				title = await acode.prompt("Preset your custom name:", title);
+
+				if (typeof title !== "string") return;
+
+				url = await acode.prompt("State a primary address for initial loading:", url);
+
+				if (typeof url !== "string") return;
+
+				url = normalizeURI(url);
+
+				if (! (title && url)) acode.alert("ERROR", "Invalid information(s): Giving empty name or normal text as link is impermissible.");
+				else exports.homepage.access({
+					"title": title,
+					"url": url
+				}, Toast, "Start page updated successfully.");
+			};
+			exports.domCache.browseCopied.onclick = () => cordova.plugins.clipboard.paste(value => {
+				if (URL.canParse(value)) exports.domCache.activeTab.src = value;
+				else acode.alert("ERROR", "Copied text isn't a valid link to go.");
+			}, message => acode.alert("ERROR", "Can't read clipboard: " + message));
+			exports.domCache.showSavedSites.onclick = () => exports.docPage.show();
+			exports.domCache.add.onclick = async (_, { title, url } = exports.homepage.access()) => {
+				title = await acode.prompt("Rename tab if needed:", title);
+
+				if (typeof title === "string") {
+					createTab(title || "New Tab", normalizeURI(exports.domCache.addressbar.value) || url);
+					updateControlStates();
+				};
+			};
+			exports.domCache.reload.onclick = exports.domCache.back.onclick = exports.domCache.forward.onclick = function () {
+				exports.domCache.refActBtnsOff = false;
+				exports.domCache.activeTab.browsingHistory.navigate(this.id);
 			};
 			exports.domCache.openBrowser.onclick = () => acode.exec("open-inapp-browser", exports.domCache.activeTab.src);
-			exports.domCache.resetAll.onclick = async () => {
-				if (await Confirm("DANGER!", "Consider at least thrice, advancing will wipe all settings and restore defaults. Continue?") == 1) {
-					// Forget future regrets.
-					exports.hpInf.access(exports.googleLite);
+			exports.domCache.sitesTileContainer.style.display = "none";
 
-					Toast("Clearing succeeded.");
-				} else Toast("Good! I appreciate your choice, nevermind.");
-			};
-			exports.domCache.add.onclick = async () => {
-				const hpInf = exports.hpInf.access();
+			// Shortcut icon updater is on duty:
+			Object.defineProperty(exports.domCache, "webIconHref", {
+				set(url) {
+					this.favicon.parentNode.classList.remove("public");
+					this.favicon.hidden = false;
+					this.favicon.src = "https://www.google.com/s2/favicons?domain=" + new URL(url).hostname + "&sz=16";
+				},
+				enumerable: true,
+				configurable: true
+			});
 
-				createTab(await Prompt("Name your tab:", hpInf.title) || "New Tab", exports.domCache.textBox.value || hpInf.Url);
-
-				if (exports.recentTabs.size == 1) PanelGuard.observe(document.body, exports.guardOpts);
-			};
-			exports.domCache.reload.onclick = () => exports.domCache.activeTab.contentWindow.location.reload();
-			exports.domCache.back.onclick = () => exports.domCache.activeTab.contentWindow.history.back();
-			exports.domCache.forward.onclick = () => exports.domCache.activeTab.contentWindow.history.forward();
+			// Assisted/forced disabling action buttons are on duty:
+			Object.defineProperty(exports.domCache, "refActBtnsOff", {
+				set(value) {
+					this.reload.disabled = value;
+					this.back.disabled = value || this.activeTab.browsingHistory.currentIndex === 0;
+					this.forward.disabled = value || this.activeTab.browsingHistory.currentIndex === this.activeTab.browsingHistory.length - 1;
+				},
+				enumerable: true,
+				configurable: true
+			});
 
 			// I'm lonely.
+			document.getElementByOrderedIndex(1, 0, 0).onclick = async () => {
+				if (exports.bookmarkList.hasOwnProperty(exports.domCache.activeTab.src)) return acode.alert("ERROR", "Can't create this one, already exists.");
+
+				let title = (await acode.prompt("Plan a great name:"))?.trim().replace(/\s+/g, " ");
+
+				if (typeof title === "string") {
+					title = title || "Untitled";
+					exports.bookmarkList[exports.domCache.activeTab.src] = title;
+					exports.domCache.sitesTileContainer.appendChild(insertSavedWebTile(title, exports.domCache.activeTab.src));
+				};
+			};
+
+			// Me too.
 			exports.domCache.isDefined = true;
-		} else if (exports.recentTabs.size == 0) PanelGuard.disconnect();
+
+			// More than you bro.
+			for (const url in exports.bookmarkList) exports.domCache.sitesTileContainer.appendChild(insertSavedWebTile(exports.bookmarkList[url], url));
+		};
 
 		// Wanna rest? Go, get on bed.
 
 		// Shortcut binding is helpful.
-		exports.domCache.activeTab = exports.recentTabs.get(editorManager.activeFile.id);
+		exports.domCache.activeTab = exports.totalTabs.get(editorManager.activeFile.id);
 
 		// Restrict user to compromise smartphone health.
-		exports.domCache.add.disabled = exports.recentTabs.size >= 3;
+		exports.domCache.add.disabled = exports.totalTabs.size >= 3;
 
 		// Occupation assignment hasn't done yet.
 		if (URL.canParse(exports.domCache.activeTab?.src)) {
-			if (exports.domCache.textBox.value.trim().length == 0) exports.domCache.textBox.value = exports.domCache.activeTab.src;
+			if (! exports.domCache.addressbar.value.trim()) exports.domCache.addressbar.value = exports.domCache.activeTab.src;
 
-			exports.domCache.favicon.src = "https://www.google.com/s2/favicons?domain=" + new URL(exports.domCache.activeTab.src).hostname + "&sz=16";
-			exports.domCache.go.style.display = "block";
-			exports.domCache.openBrowser.disabled = exports.domCache.reload.disabled = exports.domCache.back.disabled = exports.domCache.forward.disabled = false;
-			exports.domCache.resetAll.disabled = true;
+			exports.domCache.webIconHref = exports.domCache.activeTab.src;
+			exports.domCache.go.style.visibility = "visible";
+			exports.domCache.browseCopied.disabled = exports.domCache.showSavedSites.disabled = exports.domCache.openBrowser.disabled = exports.domCache.refActBtnsOff = false;
 		} else {
-			exports.domCache.favicon.src = exports.defWebIco;
-			exports.domCache.go.style.display = "none";
-			exports.domCache.openBrowser.disabled = exports.domCache.reload.disabled = exports.domCache.back.disabled = exports.domCache.forward.disabled = true;
-			exports.domCache.resetAll.disabled = false;
+			// Force setting up fallback icon.
+			exports.domCache.favicon.dispatchEvent(new Event("error"));
+
+			exports.domCache.go.style.visibility = "hidden";
+			exports.domCache.browseCopied.disabled = exports.domCache.showSavedSites.disabled = exports.domCache.openBrowser.disabled = exports.domCache.refActBtnsOff = true;
 		};
 	};
 
 	// Of course, start your journey.
-	acode.setPluginInit(exports.packageId, baseDir => fetch(baseDir + "/plugin.json").then(request => {
+	acode.setPluginInit(exports.packageId, (baseDir, $page) => fetch(URL.join(baseDir, "plugin.json")).then(request => {
 		// Check situation.
 		if (! request.ok) throw new Error("HTTP code: " + request.status);
 
-		// Parse file data.
+		// Parse text file.
 		return request.json();
 	}).then(result => {
 		// Detach first piece, then other works.
-		const forename = result.name.trim().split(/\s+/)[0], recentTabs = settings("recentTabs"), firstInit = (identifier => {
-			// Mark for new users, are they unknown?
-			// Notice: Hooray! I've been chosen, thanks buddy.
-
-			return (identifier.access() || identifier.access(true)) ?? false;
-		})(settings(forename.concat(":") + "firstInit"));
+		const forename = result.name.trim().split(/\s+/)[0];
 
 		// Autism is live even in virtual worlds.
 		Object.assign(exports, {
-			"defWebIco": baseDir + "/img/globe.png",
-			"hpInf": settings("homePage", true),
-			"btnName": "span[title='" + forename + "'][data-id='" + exports.packageId + "']"
+			"bookmarkList": (that => new Proxy({...that.access()}, {
+				set(target, key, value) {
+					if (target[key] === value) return true;
+
+					target[key] = value;
+					that.access({...target});
+					return true;
+				},
+				deleteProperty(target, key) {
+					delete target[key];
+					that.access({...target});
+					return true;
+				}
+			}))($config("bookmarks", true)),
+			"docPage": $page,
+			"homepage": $config("homepage", true),
+			"toolAttrs": "span[title='" + forename + "'][data-action='sidebar-app'][data-id='" + exports.packageId + "']",
+			"recentTabs": $config("recentTabs")
 		});
+
+		// For now: use their product instead.
+		if (! URL.canParse(exports.homepage.access()?.url)) {
+			exports.homepage.access({
+				"title": "Google Search",
+				"url": "https://www.google.com/webhp?igu=1"
+			});
+
+			// Attention please!
+			// Could be its first initialization.
+			acode.alert("WARNING", "Cache database for both In-App Browser and " + forename + " are different, maybe somewhere progress may need to be redone.");
+		};
+
+		// Brand our little product.
+		acode.addIcon(forename.toLowerCase(), URL.join(baseDir, result.icon));
+
+		// Attach the watcher.
+		exports.domCache.menuBtn.addEventListener("click", _interactionWatcher);
 
 		// Pick up broom and side dead bodies.
 		editorManager.files.forEach(identifier => {
-			if (recentTabs.access()?.includes?.(identifier.id)) identifier.remove(true, {
+			if (exports.recentTabs.access()?.includes?.(identifier.id)) identifier.remove(true, {
 				"ignorePinned": true // Force close without save prompt with bypassing the pinned check.
 			});
 		});
-		recentTabs.purge();
+		exports.recentTabs.purge();
 
-		// Listen for future tab switches to show/hide sessions.
-		// Fastest looking up for live tabs structure, just single passing, no callbacks, no extra methods.
-		editorManager.on("switch-file", property => exports.recentTabs.forEach(identifier => identifier.style.visibility = identifier.id == property.id ? "visible" : "hidden"));
+		// Listen for future tab switches to show/hide sessions + start/stop panel popup watching.
+		// Fastest looking up for live tabs structure, just single passing, no extra tricks.
+		editorManager.on("switch-file", property => exports.totalTabs.forEach(identifier => identifier.style.visibility = identifier.id === property.id ? "visible" : "hidden"));
 
+		// None said to flex with complications, just fix memory leaking and optimize performance.
 		// Advantage: Not ours? Don't touch that = zero reflow cost.
 
 		// Clean up if the user closes our tab.
 		editorManager.on("remove-file", property => {
-			const targetTab = exports.recentTabs.get(property.id);
+			const targetTab = exports.totalTabs.get(property.id);
 
 			targetTab?.contentWindow?.location.replace("about:blank");
 			targetTab?.remove?.();
-			exports.recentTabs.delete(property.id);
+			exports.totalTabs.delete(property.id);
 		});
 
 		// Shoot.
-		PanelGuard.observe(document.body, exports.guardOpts);
-		Sidebar.add("public", exports.packageId, forename, container => container.innerHTML = `
+		Sidebar.add(forename.toLowerCase(), exports.packageId, forename, container => container.innerHTML = `
 			<link rel="stylesheet" href="${baseDir}/src/ui.css"/>
-			<div class="top_content">
-				<img id="shortcut_icon"/>
-				<input id="address_bar" type="text" dir="auto" placeholder="Type to navigate"/>
-				<button id="go"><img src="${baseDir}/img/enter.svg"/></button>
+			<div class="top-section">
+				<span class="icon"><img/></span>
+				<input type="text" dir="auto" placeholder="Enter address to browse"/>
+				<button><img src="${baseDir}/img/enter.svg"/></button>
 			</div>
 			<br/>
-			<button id="change_hpinfo" class="long_size">Change default location</button>
-			<button id="open_browser" class="long_size">Launch In-App Browser</button>
-			<button id="reset_defaults" class="long_size">Reset all settings</button>
-			<div class="bottom_content">
-				<button id="add"><img src="${baseDir}/img/add.svg"/></button>
-				<button id="reload"><img src="${baseDir}/img/reload.svg"/></button>
-				<button id="back"><img src="${baseDir}/img/back.svg"/></button>
-				<button id="forward"><img src="${baseDir}/img/forward.svg"/></button>
+			<button class="long-size">Change my HomePage</button>
+			<button class="long-size">Go to copied URL</button>
+			<button class="long-size">Open saved sites list</button>
+			<div class="bottom-section">
+				<button><img src="${baseDir}/img/add.svg"/></button>
+				<button><img src="${baseDir}/img/reload.svg"/></button>
+				<button><img src="${baseDir}/img/back.svg"/></button>
+				<button><img src="${baseDir}/img/forward.svg"/></button>
+				<button><img src="${baseDir}/img/external-link.svg"/></button>
 			</div>
-		`, true);
-
-		// Attention please!
-		if (! firstInit) {
-			// Handful of default settings.
-			// For now: use their product instead.
-			exports.hpInf.access(exports.googleLite);
-
-			Alert("WARNING", "Cache database for both In-App Browser and " + forename + " are different, maybe somewhere progress may need to be redone.");
-		};
+		`, false, updateControlStates);
 	}).catch(message => {
 		// Sorry to hear.
 		console.error("Unexpected occurrence:", message);
-		Alert("ERROR", "Skipped process due to execution failure.");
+		acode.alert("ERROR", "Skipped process due to execution failure.");
 	}));
 
 	// Goodnight friend, meet me at the end.
 	acode.setPluginUnmount(exports.packageId, () => {
+		// Last line is being deleted from here:
+		// Alas! My one week is successfully wasted btw.
 		Sidebar.remove(exports.packageId);
-		PanelGuard.disconnect();
 
+		// Detach the watcher.
+		exports.domCache.menuBtn.removeEventListener("click", _interactionWatcher);
+
+		// Strike down temporarily for next launch.
 		exports.domCache.isDefined = false;
 	});
-})();
 
-// All done, we need to take a power nap.
-// Wait for more inventions, see yah later!
+	// Yo, polishing completed. And in bonus, electron saver version is ready.
+	// Leave star, then wait for more inventions. Gotta take a power nap. See yah!
+})();
