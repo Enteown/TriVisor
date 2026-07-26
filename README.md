@@ -2,15 +2,13 @@
 __A mini, but useful extension built to fold same-origin navigation.__
 
 ## __Preview__
+![__Running a YouTube video (Embedded)__](https://github.com/Enteown/Enteown/raw/refs/heads/master/Pictures/Acode_Screenshot-1.jpg)
 ![__Opened Wikipedia alongside Acode (Ace Editor)__](https://github.com/Enteown/Enteown/raw/refs/heads/master/Pictures/Screenshot_2026-06-29-18-35-42-18_a2cf8efcdd42a8e6f7906303f104fb67.jpg)
 
 ## __Installation__
 
 ### __Automatic__
 __Launch Acode application, open *Extensions* panel and search for, then install it.__
-
-> [!NOTE]
-> __Wait for this, until being available on store in no time.__
 
 ### __Manual__
 
@@ -29,7 +27,7 @@ pkg --check-mirror install git zip -y
 git clone "https://github.com/Enteown/TriVisor"
 ```
 
-- __Don't forget, to update your current directory:__
+- __Don't forget to update your current directory:__
 ```bash
 cd "TriVisor"
 ```
