@@ -91,14 +91,12 @@ function normalizeURI(uri, realpath = "") {
 };
 
 
-
 // Keep your room clean.
 (() => {
 	// Capture exact photocopy of all required items.
 	const exports = {
 		"domCache": {
-			"isDefined": false,
-			"menuBtn": document.querySelector("span.icon.menu[action='toggle-sidebar']")
+			"isDefined": false
 		},
 		"packageId": (() => {
 			// Build folder path, then cut out the name of target.
@@ -351,7 +349,6 @@ function normalizeURI(uri, realpath = "") {
 			exports.docPage.hide();
 			exports.domCache.activeTab.src = url;
 		};
-
 		item.append(goIcon, delIcon);
 
 		return item;
@@ -554,7 +551,14 @@ function normalizeURI(uri, realpath = "") {
 		acode.addIcon(forename.toLowerCase(), URL.join(baseDir, result.icon));
 
 		// Attach the watcher.
-		exports.domCache.menuBtn.addEventListener("click", _interactionWatcher);
+		document.addEventListener("click", function that() {
+			exports.domCache.menuBtn = document.querySelector("span.icon.menu[action='toggle-sidebar']");
+
+			if (exports.domCache.menuBtn) {
+				this.removeEventListener("click", that);
+				exports.domCache.menuBtn.addEventListener("click", _interactionWatcher);
+			};
+		});
 
 		// Pick up broom and side dead bodies.
 		editorManager.files.forEach(identifier => {
