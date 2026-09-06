@@ -1,54 +1,42 @@
 # __Us vs Franklin Labs__
-__A mini, but useful extension built to fold same-origin navigation.__
+__A mini, but useful extension built to fold cross-origin navigation.__
 
 ## __Preview__
-![__Running a YouTube video (Embedded)__](https://github.com/Enteown/Enteown/raw/refs/heads/master/Pictures/Acode_Screenshot-1.jpg)
-![__Opened Wikipedia alongside Acode (Ace Editor)__](https://github.com/Enteown/Enteown/raw/refs/heads/master/Pictures/Screenshot_2026-06-29-18-35-42-18_a2cf8efcdd42a8e6f7906303f104fb67.jpg)
+> [!NOTE]
+> __Coding alongside Gemini AI webpage.__
+
+![__Screenshot Preview__](https://www.github.com/Enteown/Enteown/raw/refs/heads/master/Pictures/Screenshot_JS,CSS,Google_Search.jpg)
+
+> [!NOTE]
+> __Watching a video from YouTube.__
+
+![__Screenshot Preview__](https://www.github.com/Enteown/Enteown/raw/refs/heads/master/Pictures/Screenshot_YouTube(Embed),Topic-ReactNative.jpg)
+
+__To do it by yourself, open YouTube in mobile. Find your video/playlist, then copy link by using sharing button. Now come back here, create a new tab, then go to there.__
 
 ## __Installation__
+__Launch Acode Editor, open *Extensions* panel and search for, then install it.__
 
-### __Automatic__
-__Launch Acode application, open *Extensions* panel and search for, then install it.__
+## __Wanna help?__
+__Still, there are a huge quantity of embeddable websites which we lacked to support in our plug-in, you can add one of them, for the community.__
 
-### __Manual__
+__But at first, understand what's happening in the `generateEmbedUrl()`, how actually it works. Must keep in mind, it just opens a specific content (like Post, Reel or Video/Playlist from direct links) but never the full-fledged site itself.__
 
-- __First, allow Termux of access for Internal Storage:__
-```bash
-termux-setup-storage
-```
+__Currently available:__
+- __Codepen__
+- __Dailymotion__
+- __Instagram__
+- __JSFiddle__
+- __Twitter__
+- __Vimeo__
+- __YouTube__
 
-- __Then, make sure `git` and `zip` are latest:__
-```bash
-pkg --check-mirror install git zip -y
-```
-
-- __After that, clone repository like below:__
-```bash
-git clone "https://github.com/Enteown/TriVisor"
-```
-
-- __Don't forget to update your current directory:__
-```bash
-cd "TriVisor"
-```
-
-- __At last, paste and hit enter, then checkout files:__
-```bash
-zip -r "/sdcard/Download/$(basename $(pwd))-$(date '+%Y%m%d-%H%M%S').zip" "." -x ".git/*"
-```
-- __If everything goes alright, tap on the `+` icon, select local source, browse for, then open that archive.__
-
-## __Usage__
-1. __Complete installation.__
-2. __Now open the panel of Acode.__
-3. __You may see a globe icon, click that.__
-
-> [!WARNING]
-> __Don't try to reload, disable/enable instead.__
+__Also the site scrapper is very basic, that needs upgrading by us more.__
 
 ## __Contributors__
 - __Ship Lead:__ *Me* __&#x1F90E;__
-- __Co-Dev:__ *Meta AI* __&#x1F49C;__ *+ Gemini* __(taken little help)__
+- __Co-Devs:__ *Meta AI* __&#x1F49C;__ *+ Gemini* __(taken little help)__
+- __You: The star? (maybe)__ __&#x2B50;__ __Your presence, here? It's enough!__
 
 
-<p align="center">We're on mission to bring peace in our planet &#x1F680;</p>
+<p align="center">We're on mission to bring peace in our planet! &#x1F680;</p>
