@@ -9,7 +9,7 @@
 	"license": "MIT",
 	"minVersionCode": 290,
 	"repository": "https://www.github.com/Enteown/TriVisor",
-	"keywords": ["Browser", "Firefox", "Internet", "Scrapper", "WebView"],
+	"keywords": ["Browser", "Internet", "Scrapper", "WebView"],
 	"author": {
 		"name": "Null",
 		"github": "Enteown"
