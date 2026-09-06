@@ -33,6 +33,9 @@ __Currently available:__
 
 __Also the site scrapper is very basic, that needs upgrading by us more.__
 
+> [!WARNING]
+> __Never even think of obtaining special permissions, like camera or microphone etc. Not gonna work, thought.__
+
 ## __Contributors__
 - __Ship Lead:__ *Me* __&#x1F90E;__
 - __Co-Devs:__ *Meta AI* __&#x1F49C;__ *+ Gemini* __(taken little help)__
