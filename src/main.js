@@ -168,8 +168,11 @@ function normalizeURI(uri, realpath = "") {
 
 				// Replace the target selection when needed.
 				if (typeof value !== "undefined") {
+					// Why yelling on a very silly topic repeatedly?
+					const type = getType(value);
+
 					// Tip: Brat protection armor equipped.
-					if (! (["Array", "Boolean", "Null", "Object", "String"].includes(getType(value)) || Number.isFinite(value))) value = null;
+					if (! (type === "Array" || type === "Boolean" || type === "Null" || type === "Object" || type === "String" || Number.isFinite(value))) value = null;
 					if (isPersistent) {
 						// Push into it.
 						section[key] = value;
