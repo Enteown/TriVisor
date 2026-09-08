@@ -546,7 +546,7 @@ function normalizeURI(uri, realpath = "") {
 
 			// Wake up... servants.
 			document.getElementByOrderedIndex(1, 0, 0).onclick = async () => {
-				const url = factory.domCache.proxyStatus.checked ? factory.activeTab.container.contentWindow.fakeloc.href : factory.activeTab.container.src;
+				const url = factory.domCache.proxyStatus.checked ? factory.activeTab.container.contentWindow.url.href : factory.activeTab.container.src;
 
 				if (factory.allSavedSites.hasOwnProperty(url)) return acode.alert("ERROR", "Can't create this one, already exists.");
 
@@ -635,7 +635,7 @@ function normalizeURI(uri, realpath = "") {
 				factory.domCache.forward.disabled = factory.activeTab.latestSerial === factory.activeTab.browsingHistory.length - 1;
 				factory.domCache.favicon.src = factory.domCache.addressbar.value = factory.activeTab.container.src;
 			};
-			factory.domCache.openBrowser.onclick = () => system.openInBrowser(factory.domCache.proxyStatus.checked ? factory.activeTab.container.contentWindow.fakeloc.href : factory.activeTab.container.src);
+			factory.domCache.openBrowser.onclick = () => system.openInBrowser(factory.domCache.proxyStatus.checked ? factory.activeTab.container.contentWindow.url.href : factory.activeTab.container.src);
 			factory.domCache.sitesTileContainer.style.display = "none";
 
 			// Assisted shortcut icon updater is on duty:
