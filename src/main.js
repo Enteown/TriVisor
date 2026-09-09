@@ -28,7 +28,7 @@ Object.assign(document, {
 	"getElementByOrderedIndex": function (...sequence) {
 		let currentChild;
 
-		if (! (this.indexRoot instanceof Element)) throw new TypeError("Invalid root: expected standard element, but got: " + getType(this.indexRoot));
+		if (! (this.indexRoot instanceof Element)) throw new TypeError("Invalid DOM: expected standard element, but got: " + this.indexRoot?.constructor?.name);
 		return sequence.reduce((content, index) => {
 			// Now it can even grab itself.
 			// News: Removed legacy allowlist.
@@ -39,12 +39,6 @@ Object.assign(document, {
 		}, this.indexRoot);
 	}
 });
-
-// Tip: Very accurate, variable type checker.
-function getType(value) {
-	// Successor of its ancestors.
-	return Object.prototype.toString.call(value).slice(8, -1);
-};
 
 // Tip: Link verifier + auto-correct feature.
 function normalizeURI(uri, realpath = "") {
@@ -158,7 +152,7 @@ function normalizeURI(uri, realpath = "") {
 		let section = _config.value[factory.packageId];
 
 		// Didn't find yourself? Silently reserve a seat.
-		if (getType(section) !== "Object") section = _config.value[factory.packageId] = {};
+		if (section?.constructor?.name !== "Object") section = _config.value[factory.packageId] = {};
 
 		// Persistent scoped helpers that'll handover my personal assistant.
 		return {
@@ -167,12 +161,12 @@ function normalizeURI(uri, realpath = "") {
 				const content = isPersistent ? section[key] : localStorage.getItem(key);
 
 				// Replace the target selection when needed.
-				if (typeof value !== "undefined") {
-					// Why yelling on a very silly topic repeatedly?
-					const type = getType(value);
+				if (value !== void 0) {
+					// Yelling modern ways, improving clever ways.
+					const myType = typeof value;
 
 					// Tip: Brat protection armor equipped.
-					if (! (type === "Array" || type === "Boolean" || type === "Null" || type === "Object" || type === "String" || Number.isFinite(value))) value = null;
+					if (! (value === null || myType === "boolean" || myType === "string" || Array.isArray(value) || value?.constructor?.name === "Object" || Number.isFinite(value))) value = null;
 					if (isPersistent) {
 						// Push into it.
 						section[key] = value;
@@ -186,7 +180,7 @@ function normalizeURI(uri, realpath = "") {
 				};
 
 				// Sure?
-				if (typeof content === "undefined" || (! isPersistent && typeof content === "object")) return;
+				if (content === void 0 || (! isPersistent && content === null)) return;
 
 				// Hey, send it.
 				return isPersistent ? content : JSON.parse(content);
@@ -699,6 +693,7 @@ function normalizeURI(uri, realpath = "") {
 		};
 	};
 
+
 	// Of course, start your journey.
 	acode.setPluginInit(factory.packageId, (baseDir, $page) => fetch(acode.joinUrl(baseDir, "plugin.json")).then(request => {
 		// Check situation.
@@ -891,7 +886,7 @@ function normalizeURI(uri, realpath = "") {
 		acode.alert("ERROR", "Skipped process due to execution failure.");
 
 		// Sad.
-		throw new Error("Unexpected occurrence: " + error.message);
+		throw new Error("Unexpected occurrence: " + error.stack);
 	}));
 
 	// Goodnight friend, meet me at the end.
