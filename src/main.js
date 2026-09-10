@@ -118,30 +118,30 @@ function normalizeURI(uri, realpath = "") {
 		})
 	},
 
-	// Better to perform shortcut binding, will provide design agility.
-	Sidebar = acode.require("sidebarApps"),
+		// Better to perform shortcut binding, will provide design agility.
+		Sidebar = acode.require("sidebarApps"),
 
-	// The dummy counterparts.
-	_config = acode.require("settings"), _save = section => _config.update({
-		// Magic words to write database in disk file.
-		[factory.packageId]: section
-	}, false),
+		// The dummy counterparts.
+		_config = acode.require("settings"), _save = section => _config.update({
+			// Magic words to write database in disk file.
+			[factory.packageId]: section
+		}, false),
 
-	_error = new Event("error"), _redirectorBlueprint = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, "src"), _changeSubtextAndFrame = (id, value, once) => setTimeout(() => factory.totalTabs.has(id) && editorManager.activeFile.id === id && (() => {
-		const targetTab = factory.totalTabs.get(id);
+		_error = new Event("error"), _redirectorBlueprint = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, "src"), _changeSubtextAndFrame = (id, value, once) => setTimeout(() => factory.totalTabs.has(id) && editorManager.activeFile.id === id && (() => {
+			const targetTab = factory.totalTabs.get(id);
 
-		editorManager.header.subText = targetTab.statusText || value;
-		targetTab.container.style.visibility = "visible";
+			editorManager.header.subText = targetTab.statusText || value;
+			targetTab.container.style.visibility = "visible";
 
-		// Yeah, you're no more, die.
-		if (once) targetTab.statusText = "";
-	})()),
+			// Yeah, you're no more, die.
+			if (once) targetTab.statusText = "";
+		})()),
 
-	// Notice: Removed observer which rises heavy process usage.
+		// Notice: Removed observer which rises heavy process usage.
 
-	// Hijacking plan cancelled, activating beast mode.
-	// Watcher for menu toggles.
-	_interactionWatcher = () => setTimeout(() => document.querySelector("span[data-action='sidebar-app'][data-id='" + factory.packageId + "']")?.classList.contains("active") && updateControlStates());
+		// Hijacking plan cancelled, activating beast mode.
+		// Watcher for menu toggles.
+		_interactionWatcher = () => setTimeout(() => document.querySelector("span[data-action='sidebar-app'][data-id='" + factory.packageId + "']")?.classList.contains("active") && updateControlStates());
 
 	// I'm empty.
 	function $config(key, isPersistent) {
