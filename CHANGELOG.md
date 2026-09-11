@@ -8,6 +8,7 @@
 
 - __Codename: *Ultimate-d Update*__
 - __Highlights: Worked much well on extensive browsing support through Proxy, plus added settings for embedded player.__
+- __Notice: From now, only minor updates would be released for actual power users, so don't forget to share opinion.__
 
 
 <p align="center">Eagerly waiting for your comment! &#x1F4A3;</p>

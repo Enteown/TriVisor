@@ -1,6 +1,7 @@
 # __Us vs Franklin Labs__
 __A mini, but useful extension built to fold cross-origin navigation.__
 
+
 ## __Preview__
 > [!NOTE]
 > __Coding alongside Gemini AI webpage.__
@@ -12,7 +13,19 @@ __A mini, but useful extension built to fold cross-origin navigation.__
 
 ![__Screenshot Preview__](https://www.github.com/Enteown/Enteown/raw/refs/heads/master/Pictures/Screenshot_YouTube(Embed),Topic-ReactNative.jpg)
 
-__To do it by yourself, open YouTube in mobile. Find your video/playlist, then copy link by using sharing button. Now come back here, create a new tab, then go to there.__
+> [!TIP]
+> __To do it by yourself, open CodePen/Twitter/YouTube (most of the case) in mobile or external Browser. Find your video/playlist, then copy link by using share button. Now come back here, create new tab, then go to there.__
+
+> [!NOTE]
+> __Searching on DuckDuckGo (using Proxy feature because they block cross-origin access)__
+
+![__Screenshot Preview__](https://www.github.com/Enteown/Enteown/raw/refs/heads/master/Pictures/Screenshot_DuckDuckGo+Proxy.jpg)
+
+> [!TIP]
+> __For loading websites which don't work normally, you may turn on "Bypass paywall mode" switch. It mostly serves requests like a broker, convincing client to be easy more among fetching code.__
+
+> [!WARNING]
+> __Oh wait a second, it's not good to expect websites that uses client-side rendering under the hood, like Facebook to load. They'll surely crash here!__
 
 ## __Installation__
 __Launch Acode Editor, open *Extensions* panel and search for, then install it.__
@@ -23,8 +36,9 @@ __Still, there are a huge quantity of embeddable websites which we lacked to sup
 __But at first, understand what's happening in the `generateEmbedUrl()`, how actually it works. Must keep in mind, it just opens a specific content (like Post, Reel or Video/Playlist from direct links) but never the full-fledged site itself.__
 
 __Currently available:__
-- __Codepen__
+- __CodePen__
 - __Dailymotion__
+- __Facebook (coming soon)__
 - __Instagram__
 - __JSFiddle__
 - __Twitter__
