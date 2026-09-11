@@ -1,7 +1,7 @@
 /* Extended classes for avoiding serious collusion */
 
 /* Styling part */
-button.iframe-sidebar.long-size {
+button.long-size.iframe-sidebar, button.long-size.iframe-page {
 	background-color: var(--button-background-color);
 	color: var(--button-text-color);
 	border: 3px solid transparent; /* No border at first */
@@ -11,17 +11,17 @@ button.iframe-sidebar.long-size {
 	font-weight: 600;
 	transition: border-color 0.3s ease, filter 0.2s ease;
 }
-button.iframe-sidebar.long-size:active {
+button.long-size.iframe-sidebar:active, button.long-size.iframe-page:active {
 	border-color: var(--button-active-color); /* Colored border shows on click */
 	outline: none;
 }
-div.iframe-sidebar.top-section {
+div.top-section.iframe-sidebar {
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	gap: 12px;
 }
-div.iframe-sidebar.top-section > span.icon {
+div.top-section.iframe-sidebar > span.icon {
 	position: relative;
 	font-size: 24px;
 	bottom: 6px;
@@ -31,12 +31,12 @@ div.iframe-sidebar.top-section > span.icon {
 	-webkit-tap-highlight-color: transparent; /* Kills mobile tap flash */
 }
 /* Also nuke it on clicking */
-div.iframe-sidebar.top-section > span.icon:active {
+div.top-section.iframe-sidebar > span.icon:active {
 	background: transparent !important; /* Override Acode defaults */
 	box-shadow: none !important;
 }
 /* Tactics are very nasty though */
-div.iframe-sidebar.top-section > span.icon > img {
+div.top-section.iframe-sidebar > span.icon > img {
 	position: relative;
 	top: 1px;
 	width: 24px;
@@ -46,7 +46,7 @@ div.iframe-sidebar.top-section > span.icon > img {
 	object-fit: contain;
 	object-position: center;
 }
-div.iframe-sidebar.top-section > input {
+div.top-section.iframe-sidebar > input {
 	position: relative;
 	right: 3px;
 	flex: 1;
@@ -58,7 +58,7 @@ div.iframe-sidebar.top-section > input {
 	min-width: 0;
 	padding-right: 12px;
 }
-div.iframe-sidebar.top-section > button {
+div.top-section.iframe-sidebar > button {
 	position: absolute;
 	right: 9px;
 	top: 15px;
@@ -70,33 +70,34 @@ div.iframe-sidebar.top-section > button {
 	transition: ease 0.3s;
 	transform: translateY(-50%);
 }
-div.iframe-sidebar.top-section > button > img {
+div.top-section.iframe-sidebar > button > img {
 	position: relative;
 	top: 1px;
 }
-div.iframe-sidebar.middle-section {
+div.middle-section.iframe-sidebar {
 	border: 2px solid var(--border-color);
 	border-radius: 7px;
 	margin-left: 12px;
 	margin-right: 12px;
 }
-div.iframe-sidebar.middle-section > div {
+div.middle-section.iframe-sidebar > div {
 	padding: 6px;
 	display: flex;
 	justify-content: space-between;
 }
-div.iframe-sidebar.middle-section > div > label.switch {
+div.middle-section.iframe-sidebar > div > label.switch {
 	position: relative;
 	display: inline-block;
 	width: 30px;
 	height: 18px;
+	flex-shrink: 0; /* Acode (CodeMirror Editor) really sucks on simple matters (e.g. calling virtual keyboard, rendering on increased UI scale etc.) */
 }
-div.iframe-sidebar.middle-section > div > label.switch > input {
+div.middle-section.iframe-sidebar > div > label.switch > input {
 	opacity: 0;
 	width: 0;
 	height: 0;
 }
-div.iframe-sidebar.middle-section > div > label.switch > span.slider {
+div.middle-section.iframe-sidebar > div > label.switch > span.slider {
 	position: absolute;
 	cursor: pointer;
 	top: 0;
@@ -107,7 +108,7 @@ div.iframe-sidebar.middle-section > div > label.switch > span.slider {
 	transition: 0.3s;
 	border-radius: 28px;
 }
-div.iframe-sidebar.middle-section > div > label.switch > span.slider:before {
+div.middle-section.iframe-sidebar > div > label.switch > span.slider:before {
 	position: absolute;
 	content: "";
 	height: 10px;
@@ -118,20 +119,20 @@ div.iframe-sidebar.middle-section > div > label.switch > span.slider:before {
 	transition: 0.3s;
 	border-radius: 50%;
 }
-div.iframe-sidebar.middle-section > div > label.switch > input:checked + span.slider {
+div.middle-section.iframe-sidebar > div > label.switch > input:checked + span.slider {
 	background-color: var(--button-background-color);
 }
-div.iframe-sidebar.middle-section > div > label.switch > input:checked + span.slider:before {
+div.middle-section.iframe-sidebar > div > label.switch > input:checked + span.slider:before {
 	transform: translateX(12px);
 }
-div.iframe-sidebar.bottom-section {
+div.bottom-section.iframe-sidebar {
 	position: absolute;
 	bottom: 0;
 	width: 100%;
 	height: 50px;
 	background-color: var(--secondary-color);
 }
-div.iframe-sidebar.bottom-section > button {
+div.bottom-section.iframe-sidebar > button {
 	position: relative;
 	top: 10px;
 	border: 2px solid transparent; /* No border at first */
@@ -141,40 +142,41 @@ div.iframe-sidebar.bottom-section > button {
 	transition: ease 0.3s;
 	background: var(--primary-color);
 }
-div.iframe-sidebar.bottom-section > button > img {
+/* Do us a favour? Kindly gain control over their gap size, plus beautify. If anyone can, okay! */
+div.bottom-section.iframe-sidebar > button > img {
 	position: relative;
 	width: 16px;
 	height: 16px;
 	top: 2px;
 }
-div.iframe-sidebar.segmented-control {
+div.segmented-control.iframe-page {
 	text-align: center;
 }
-div.iframe-sidebar.segmented-control > button.iframe-sidebar.long-size {
+div.segmented-control.iframe-page > button.long-size.iframe-page {
 	margin-top: 10px;
 	margin-bottom: 10px;
 	width: 60%;
 }
-hr.iframe-sidebar {
+hr.iframe-page {
 	border: none; /* Remove default 3D border */
 	border-bottom: 1px solid var(--border-color); /* Make your own thin line */
 }
 /* Thanks a lot buddy! Was kinda hard you know */
-ul.iframe-sidebar.inner-section > li {
+ul.inner-section.iframe-page > li {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	gap: 12px; /* Add gap instead of relying on 'space-between' */
 	padding: 14px;
 }
-ul.iframe-sidebar.inner-section > li > div {
+ul.inner-section.iframe-page > li > div {
 	display: flex;
 	align-items: center;
 	overflow: hidden;
 	flex: 1; /* Align contents automatically */
 	min-width: 0; /* CRITICAL: Allows text to actually ellipsis */
 }
-ul.iframe-sidebar.inner-section > li > div > img {
+ul.inner-section.iframe-page > li > div > img {
 	margin-right: 18px;
 	margin-left: 14px;
 	width: 32px;
@@ -183,7 +185,7 @@ ul.iframe-sidebar.inner-section > li > div > img {
 	border-radius: 50%; /* Make it round, fashion wants a breathing room */
 	object-fit: cover; /* Prevents stretching if image isn't square */
 }
-ul.iframe-sidebar.inner-section > li > div > div {
+ul.inner-section.iframe-page > li > div > div {
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
@@ -191,13 +193,13 @@ ul.iframe-sidebar.inner-section > li > div > div {
 	flex: 1;
 	min-width: 0; /* CRITICAL: Again for ellipsis */
 }
-ul.iframe-sidebar.inner-section > li > div > div > span {
+ul.inner-section.iframe-page > li > div > div > span {
 	font-size: 1.125rem;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis; /* Add this so title doesn't wrap */
 }
-ul.iframe-sidebar.inner-section > li > div > div > small {
+ul.inner-section.iframe-page > li > div > div > small {
 	opacity: 0.6; /* 60% was invalid, use '0.6' */
 	font-size: 0.75rem;
 	white-space: nowrap;
@@ -207,16 +209,16 @@ ul.iframe-sidebar.inner-section > li > div > div > small {
 	color: #1A73E8;
 }
 /* Pin arrow and delete to the right */
-ul.iframe-sidebar.inner-section > li > span.icon.arrow {
+ul.inner-section.iframe-page > li > span.icon.arrow {
 	flex-shrink: 0;
 	margin-left: 8px;
 }
-ul.iframe-sidebar.inner-section > li > span.icon.delete {
+ul.inner-section.iframe-page > li > span.icon.delete {
 	color: #ff5252;
 	flex-shrink: 0;
 	margin-left: 8px;
 }
-h1.iframe-sidebar.zeno-state {
+h1.iframe-page.zeno-state {
 	position: relative;
 	top: 45%;
 	color: #6B7280; /* Modern app grey */
@@ -225,7 +227,7 @@ h1.iframe-sidebar.zeno-state {
 	letter-spacing: -0.5px;
 }
 /* Fake round shaped buttons, for tutorial pop-up */
-img.iframe-guide.demo-icon {
+img.demo-icon.iframe-guide {
 	background-color: var(--button-text-color);
 	position: relative;
 	top: 1.5px;
@@ -234,29 +236,29 @@ img.iframe-guide.demo-icon {
 	border-radius: 50%;
 }
 /* Separated common parts */
-div.iframe-sidebar.top-section > button:focus, div.iframe-sidebar.bottom-section > button:focus {
+div.top-section.iframe-sidebar > button:focus, div.bottom-section.iframe-sidebar > button:focus {
 	border-color: var(--active-color);
 }
-button.iframe-sidebar.long-size:disabled, div.iframe-sidebar.bottom-section > button:disabled {
+button.long-size.iframe-sidebar:disabled, div.bottom-section.iframe-sidebar > button:disabled {
 	opacity: 0.45;
 	cursor: not-allowed;
 	border-color: transparent !important;
 }
-ul.iframe-sidebar.inner-section > li > span.icon.delete, ul.iframe-sidebar.inner-section > div > li > span.icon.forward {
+ul.inner-section.iframe-page > li > span.icon.delete, ul.inner-section.iframe-page > div > li > span.icon.forward {
 	font-size: 1.5rem;
 }
 
 /* Spacing components responsively */
 /* 1. Smartphone: Vertical */
 @media (max-width: 480px) and (orientation: portrait) {
-	div.iframe-sidebar.bottom-section > button {
+	div.bottom-section.iframe-sidebar > button {
 		left: 6px;
 		margin-inline: 3px;
 	}
 }
 /* 2. Smartphone: Horizontal */
 @media (max-width: 900px) and (orientation: landscape) {
-	div.iframe-sidebar.bottom-section > button {
+	div.bottom-section.iframe-sidebar > button {
 		left: 10px;
 		margin-inline: 12px;
 	}
@@ -270,7 +272,7 @@ ul.iframe-sidebar.inner-section > li > span.icon.delete, ul.iframe-sidebar.inner
 /* Deprecated: Acode already included various color types, according to theme management, so we likely dispose old plan */
 @media (prefers-color-scheme: dark) {
 	/* Our SVG button icon color flip */
-	div.iframe-sidebar.top-section > button > img, div.iframe-sidebar.bottom-section > button > img {
+	div.top-section.iframe-sidebar > button > img, div.bottom-section.iframe-sidebar > button > img {
 		filter: invert(100%); /* Turns black icon completely to pure white in Dark */
 	}
 }

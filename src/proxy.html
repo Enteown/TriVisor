@@ -1,0 +1,201 @@
+<!DOCTYPE ht<html>
+<html>
+	<head>
+		<meta name="description" content="A pocket client-side scrapper, made for tackling a great stress."/>
+		<title>Website Loader</title>
+		<style>
+			div {
+				width: 60vw;
+				margin: 15vh auto;
+			}
+			img {
+				width: 45px;
+			}
+			h1 {
+				font-size: 1.375em;
+			}
+			textarea {
+				border: 2px solid lightgrey;
+				resize: none;
+				width: 50vw;
+				height: 8vh;
+			}
+			.hidden {
+				visibility: hidden;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="hidden">
+			<img src="../img/dead-page.svg"/>
+			<br/>
+			<h1>Sorry, we stumbled at the very midway.</h1>
+			<p>It happened because, fetching request for the webpage wasn't succeeded. Maybe a check, helps solving the reaching issue?</p>
+			<textarea disabled></textarea>
+		</div>
+		<script>
+			// Never underestimate my power!
+			"use strict";
+
+
+
+			// Here now? Means everything is going as planned.
+			// Wanna start the mission we dealt for?
+
+			// Check if a perfect playground is present.
+			if (top === window) throw new Error("This page is only supposed to run along with Acode WebView.");
+
+
+			// Notice: This part is for exposed methods for current page.
+			// An implementation of some completely faked descriptors.
+			Object.assign(window, {
+				"url": new URL(decodeURIComponent(location.search.slice(2))),
+				"headers": new Headers({
+					"Sec-Ch-Ua-Mobile": "?" + Number(navigator.userAgentData.mobile),
+					"Sec-Ch-Ua-Platform": '"' + navigator.userAgentData.platform + '"',
+					"User-Agent": navigator.userAgent
+				})
+			});
+
+			// Mimic a real example.
+			navigator.userAgentData.brands.forEach(data => headers.append("Sec-Ch-Ua", '"' + data.brand + '";v="' + data.version + '"'));
+
+			// Doppelganger guys, yahh!
+			function fetch(init = "", options) {
+				if (! (options?.constructor?.name === "Object" || options instanceof Request)) options = {};
+				if (! (typeof init === "string" || init instanceof Request)) init = String(init);
+				if (typeof init === "string") try {
+					// We can't force you.
+					new URL(init);
+				} catch {
+					// But of course can guide you.
+					init = top.acode.joinUrl(url.origin, init);
+				};
+
+				const req = new Request(init, options), plainHObject = {}, setUrl = (metadata, response) => Object.defineProperty(metadata, "url", {
+					"value": response.url,
+					"enumerable": true,
+					"configurable": true
+				});
+				let message, isPending = true;
+
+				return new Promise((resolve, reject) => {
+					req.signal.addEventListener("abort", event => isPending && reject(event.target.reason), {
+						"once": true
+					});
+
+					if (req.signal.aborted) reject(new DOMException("Signal is already broken, making request to server isn't permitted.", "AbortError"));
+					if (req.credentials !== "same-origin" && req.credentials !== "omit" && req.credentials !== "include") reject(new DOMException("Invalid credential sender configuration value got, request can't be proceeded.", "FetchError"));
+					if (req.method !== "GET" && req.method !== "POST" && req.method !== "PUT" && req.method !== "PATCH" && req.method !== "DELETE" && req.method !== "HEAD" && req.method !== "OPTIONS") reject(new DOMException("That request method isn't supported, yet.", "FetchError"));
+
+					req.headers.forEach((value, key) => plainHObject[key] = value);
+					headers.forEach((value, key) => plainHObject[key] = value);
+
+					top.cordova.plugin.http.sendRequest(req.url, {
+						"method": req.method.toLowerCase(),
+						"responseType": "arraybuffer",
+						"followRedirect": true,
+						"headers": plainHObject
+					}, response => {
+						isPending = false;
+
+						const metadata = new Response(response.data, {
+							"headers": new Headers(response.headers),
+							"status": response.status
+						});
+
+						setUrl(metadata, response);
+						resolve(metadata);
+					}, response => {
+						isPending = false;
+
+						if (response.status < 0) {
+							// It's an internal software/network error.
+							const code = top.cordova.plugin.http.ErrorCode;
+
+							switch (response.status) {
+								case code.SSL_EXCEPTION:
+									message = "SSL handshake failure, invalid certificate, or untrusted host.";
+								case code.SERVER_NOT_FOUND:
+									message = "Hostname could not be resolved (DNS failure).";
+								case code.UNSUPPORTED_URL:
+									message = "The URL protocol schema is malformed or unsupported.";
+								case code.NOT_CONNECTED:
+									message = "The device has no active internet connection.";
+								case code.POST_PROCESSING_FAILED:
+									message = "Failed to parse data (e.g., unexpected JSON token formatting).";
+								default:
+									message = "An unregistered Cordova (internal) plug-in error occurred.";
+							};
+
+							reject(new DOMException(message, "FetchError"));
+						} else {
+							const metadata = new Response(null, {
+								"headers": new Headers(response.headers),
+								"status": response.status,
+								"statusText": response.error
+							});
+
+							setUrl(metadata, response);
+							resolve(metadata);
+						};
+					});
+				});
+			};
+
+
+			// Notice: This part configures the page.
+			// Grab the page structure.
+			fetch(url.toString()).then(async response => {
+				if (! response.ok) {
+					top.toast("Error Code: " + response.status);
+					throw new Error(response.statusText);
+				};
+
+				const txtMTypes = ["javascript", "json", "xml", "wat"], ctHeader = response.headers.get("Content-Type"),
+
+					// Get everything before the semicolon, trimmed.
+					mimetype = ctHeader.split(";")[0].trim(),
+
+					// Extract the text encoding using a regular expression.
+					charset = ctHeader.match(/charset=([^;]+)/i)?.[1];
+				let myData, txtType;
+
+				if (mimetype.startsWith("text/") || txtMTypes.some(item => mimetype.endsWith(item))) {
+					myData = new TextDecoder(charset).decode(await response.arrayBuffer()); // Safely decode by the correct text encoding.
+					txtType = mimetype.endsWith("html") || mimetype.endsWith("xml") ? "source" : "plain";
+				};
+
+				// Way to go now!
+				return {
+					mimetype,
+					txtType,
+					myData
+				};
+			}).then(result => {
+				if (result.txtType === "source") {
+					const DOMContent = new DOMParser().parseFromString(result.myData, result.mimetype);
+					let snatchedDocTypeNode = document.implementation.createDocumentType("html", "", ""), foundExisting;
+
+					if (DOMContent.doctype) {
+						snatchedDocTypeNode = document.adoptNode(DOMContent.doctype);
+						foundExisting = true;
+					};
+					if (foundExisting) if (document.doctype) document.replaceChild(snatchedDocTypeNode, document.doctype);
+					if (! document.doctype) document.insertBefore(snatchedDocTypeNode, document.firstChild);
+
+					// Wohoo!
+					document.write(DOMContent.documentElement.outerHTML);
+				};
+			}).catch(error => {
+				const reporter = document.body.children[0];
+
+				reporter.children[4].value = error.message;
+				reporter.classList.value = "";
+
+				// I really, have no hope... of going there ever:
+				throw new TypeError("Failed to fetch");
+			});
+		</script>
+	</body>
+</html>

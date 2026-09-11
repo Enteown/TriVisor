@@ -453,7 +453,7 @@ function normalizeURI(uri, realpath = "") {
 		const src = props.browsingHistory[props.latestSerial];
 
 		// Recreate now.
-		props.container.src = generateEmbedUrl(src) || (factory.domCache.proxyStatus?.checked ? factory.proxyPath + "#" : "") + src;
+		props.container.src = generateEmbedUrl(src) || factory.domCache.proxyStatus?.checked ? factory.proxyPath + encodeURIComponent(src) : src;
 	};
 
 	// Written for generating a full code piece.
@@ -528,13 +528,13 @@ function normalizeURI(uri, realpath = "") {
 
 			// Set-up our sandboxed DOM.
 			factory.myPage.innerHTML = `
-				<div class="segmented-control iframe-sidebar">
-					<button class="long-size iframe-sidebar">Save current site for later</button>
+				<div class="segmented-control iframe-page">
+					<button class="long-size iframe-page">Save current site for later</button>
 				</div>
-				<hr class="iframe-sidebar"/>
-				<ul class="list scroll inner-section iframe-sidebar"></ul>
-				<hr class="iframe-sidebar"/>
-				<h1 class="zeno-state iframe-sidebar">Nothing to show.</h1>
+				<hr class="iframe-page"/>
+				<ul class="list scroll inner-section iframe-page"></ul>
+				<hr class="iframe-page"/>
+				<h1 class="zeno-state iframe-page">Nothing to show.</h1>
 			`;
 			document.indexRoot = factory.myPage;
 			document.getElementByOrderedIndex(0, 1).innerText = "Saved Sites";
@@ -608,10 +608,12 @@ function normalizeURI(uri, realpath = "") {
 			factory.domCache.muteStatus.onchange = event => factory.domCache.muteStatus.accessItem(event.target.checked);
 			factory.domCache.loopStatus.onchange = event => factory.domCache.loopStatus.accessItem(event.target.checked);
 			factory.domCache.add.onclick = async () => {
-				let { title, url } = factory.homepage.accessItem(), bustUrl = normalizeURI(factory.domCache.addressbar.value);
+				let { title, url } = factory.homepage.accessItem();
 
 				if (typeof (title = await acode.prompt("Rename tab if needed:", title)) === "string") {
-					createTab(title || "New Tab", factory.domCache.addressbar.value = bustUrl ? generateEmbedUrl(bustUrl) || (factory.domCache.proxyStatus?.checked ? factory.proxyPath + "#" : "") + bustUrl : url);
+					url = factory.domCache.addressbar.value = normalizeURI(factory.domCache.addressbar.value) || url;
+
+					createTab(title || "New Tab", generateEmbedUrl(url) || factory.domCache.proxyStatus?.checked ? factory.proxyPath + encodeURIComponent(url) : url);
 					updateControlStates();
 				};
 			};
@@ -630,7 +632,7 @@ function normalizeURI(uri, realpath = "") {
 
 				factory.domCache.back.disabled = factory.activeTab.latestSerial === 0;
 				factory.domCache.forward.disabled = factory.activeTab.latestSerial === factory.activeTab.browsingHistory.length - 1;
-				factory.domCache.favicon.src = factory.domCache.addressbar.value = factory.activeTab.container.src;
+				factory.domCache.favicon.src = factory.domCache.addressbar.value = factory.activeTab.browsingHistory[factory.activeTab.latestSerial];
 			};
 			factory.domCache.openBrowser.onclick = () => system.openInBrowser(factory.domCache.proxyStatus.checked ? factory.activeTab.container.contentWindow.url.href : factory.activeTab.container.src);
 			factory.domCache.sitesTileContainer.style.display = "none";
@@ -677,9 +679,12 @@ function normalizeURI(uri, realpath = "") {
 
 		// Occupation assignment hasn't done yet.
 		if (factory.activeTab?.container) {
-			if (! factory.domCache.addressbar.value.trim()) factory.domCache.addressbar.value = factory.activeTab.container.src;
+			// Ouch, happening so repeatedly.
+			const bustUrl = factory.activeTab.browsingHistory[factory.activeTab.latestSerial];
 
-			factory.domCache.favicon.src = factory.activeTab.container.src;
+			if (! factory.domCache.addressbar.value.trim()) factory.domCache.addressbar.value = bustUrl;
+
+			factory.domCache.favicon.src = bustUrl;
 			factory.domCache.go.style.visibility = "visible";
 			factory.domCache.back.disabled = factory.domCache.proxyStatus.checked ? false : factory.activeTab.latestSerial === 0;
 			factory.domCache.forward.disabled = factory.domCache.proxyStatus.checked ? false : factory.activeTab.latestSerial === factory.activeTab.browsingHistory.length - 1;
@@ -728,7 +733,7 @@ function normalizeURI(uri, realpath = "") {
 			}))(),
 			"myPage": $page,
 			"homepage": $config("homepage", true),
-			"proxyPath": acode.joinUrl(baseDir, "src/proxy.html"),
+			"proxyPath": acode.joinUrl(baseDir, "src/proxy.html") + "?=",
 			"recentTabs": $config("recentTabs")
 		});
 
