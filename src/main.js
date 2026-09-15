@@ -61,12 +61,12 @@ function normalizeURI(uri, realpath = "") {
 
 	try {
 		// The ultimate solution.
-		const property = new URL(uri), [, pathname, query, hash] = realpath.match(/^([^?#]*)(\?[^#]*)?(#.*)?$/);
+		const props = new URL(uri), [, pathname, query, hash] = realpath.match(/^([^?#]*)(\?[^#]*)?(#.*)?$/);
 
-		if (/^(?!.*\.\.)[a-zA-Z0-9\-._~!$&'()*+,;=:@%\/]+$/.test(pathname)) property.pathname += (! (property.pathname.endsWith("/") || realpath.startsWith("/")) ? "/" : "") + pathname;
-		if (query) property.search = query;
-		if (hash) property.hash =  hash;
-		return property.href;
+		if (/^(?!.*\.\.)[a-zA-Z0-9\-._~!$&'()*+,;=:@%\/]+$/.test(pathname)) props.pathname += (! (props.pathname.endsWith("/") || realpath.startsWith("/")) ? "/" : "") + pathname;
+		if (query) props.search = query;
+		if (hash) props.hash = hash;
+		return props.href;
 	} catch {
 		// No normal text traversal should survive.
 		return "";
@@ -87,33 +87,31 @@ function normalizeURI(uri, realpath = "") {
 			// Pack up to take our newly cooked hot equipment.
 			return parts.at(parts.indexOf("plugins") + 1);
 		})(),
-		"totalTabs": new Proxy(new Map(), {
-			get(target, operation, receiver) {
-				// We need your interactions here:
-				const boundMethods = ["clear", "delete", "set"];
-
-				// What is dangerous here, huh?
-				// We wanna intercept you all:
-				if (boundMethods.includes(operation)) return (...args) => {
-					// Act hot.
-					Map.prototype[operation].apply(target, args);
-
-					// A-Memorize!
-					factory.recentTabs.accessItem([...target.keys()]);
-
-					// Grant for chaining.
-					return receiver;
-				};
-
-				// Fix: Handle getters specifically.
-				if (operation === "size") return target.size;
-
+		"totalTabs": new Proxy({}, {
+			// We need your interactions here:
+			set(target, key, value) {
+				// Plus, if needed.
+				if (! (key in target)) ++ target.length;
+				// Act cool.
+				target[key] = value;
+				// A-Memorize!
+				factory.recentTabs.accessItem(Object.keys(target));
+				// Soup is hot, okay?
+				return true;
+			},
+			// That just existing as extras:
+			deleteProperty(target, key) {
+				// Minus, if needed.
+				if (key in target) -- target.length;
+				// Dispose of in fire.
+				delete target[key];
+				// What if, when it's hardcoded?
+				if (key in target) ++ target.length;
+				// B-Memorize!
+				if (target.length) factory.recentTabs.accessItem(Object.keys(target));
+				else factory.recentTabs.removeItem();
 				// Others should be triggered originally.
-				const value = Reflect.get(target, operation, receiver);
-
-				// If it's a method, connect it to mainline.
-				if (typeof value === "function") return value.bind(target);
-				return value;
+				return true;
 			}
 		})
 	},
@@ -127,21 +125,19 @@ function normalizeURI(uri, realpath = "") {
 			[factory.packageId]: section
 		}, false),
 
-		_error = new Event("error"), _redirectorBlueprint = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, "src"), _changeSubtextAndFrame = (id, value, once) => setTimeout(() => factory.totalTabs.has(id) && editorManager.activeFile.id === id && (() => {
-			const targetTab = factory.totalTabs.get(id);
-
-			editorManager.header.subText = targetTab.statusText || value;
-			targetTab.container.style.visibility = "visible";
-
-			// Yeah, you're no more, die.
-			if (once) targetTab.statusText = "";
-		})()),
+		_error = new Event("error"), _redirectorBlueprint = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, "src"),
 
 		// Notice: Removed observer which rises heavy process usage.
 
 		// Hijacking plan cancelled, activating beast mode.
 		// Watcher for menu toggles.
 		_interactionWatcher = () => setTimeout(() => document.querySelector("span[data-action='sidebar-app'][data-id='" + factory.packageId + "']")?.classList.contains("active") && updateControlStates());
+
+	// Neither before, nor after it gets modified. So, no worries, chill out!
+	Object.defineProperty(factory.totalTabs, "length", {
+		"value": 0,
+		"writable": true
+	});
 
 	// I'm empty.
 	function $config(key, isPersistent) {
@@ -228,6 +224,22 @@ function normalizeURI(uri, realpath = "") {
 			embedUrl = "https://geo.dailymotion.com/player.html";
 
 			if (time) knownParams.append("start", parseInt(time, 10));
+		} else if (props.host.endsWith("facebook.com") || props.host.endsWith("fb.com") || props.host.endsWith("fb.watch") && (isShortUrl = true)) {
+			embedUrl = "https://www.facebook.com/plugins/" + (path.includes("/reel/") || path.includes("/videos/") || path.includes("/watch") || isShortUrl ? "video" : "post") + ".php"; // Might be old, but is a dominating company, huhh...
+
+			// Determined content type? Good.
+			// Now set-up some parameters:
+			knownParams.append("allowfullscreen", true);
+			knownParams.append("container_width", screen.availWidth);
+			knownParams.append("href", encodeURIComponent(url));
+			knownParams.append("lazy", true);
+			knownParams.append("locale", navigator.language.replaceAll("-", "_"));
+			knownParams.append("sdk", "joey"); // What The Heck! Fucking guy's lovel by Mark? Yak thuuuu!
+			knownParams.append("show_captions", true);
+			knownParams.append("show_text", true);
+
+			delete playerConfigHardcoded.flags[1];
+			delete playerConfigHardcoded.flags[2];
 		} else if (props.host.endsWith("instagram.com") && (props.pathname.includes("/p/") || props.pathname.includes("/reel/"))) {
 			embedUrl = "https://www.instagram.com/";
 
@@ -245,6 +257,9 @@ function normalizeURI(uri, realpath = "") {
 			knownParams.append("cr", 1);
 			knownParams.append("theme", currentTheme); // Undocumented, fully experimental, don't rely on it.
 			knownParams.append("wp", screen.availWidth);
+
+			// What a disbelief, eww.
+			delete playerConfigHardcoded.flags;
 		} else if (props.host.endsWith("jsfiddle.net")) {
 			const [, username, fiddleId] = props.pathname.split("/");
 
@@ -333,7 +348,7 @@ function normalizeURI(uri, realpath = "") {
 		} else return "";
 
 		// But don't skip anything we've to achieve interactivity.
-		playerConfigHardcoded.flags?.forEach?.((key, index) => knownParams.append(key, Number(playerConfigHardcoded.states[index])));
+		playerConfigHardcoded.flags?.forEach((key, index) => key && knownParams.append(key, Number(playerConfigHardcoded.states[index])));
 
 		// Forth, append extra parts if exist.
 		if (knownParams.size) paramString = "?" + knownParams.toString();
@@ -343,13 +358,13 @@ function normalizeURI(uri, realpath = "") {
 	};
 
 	// Written for adding tabs.
-	function createTab(title, link) {
+	function createTab(title) {
 		// Create brand new product.
 		const FrameProperties = {
-			"browsingHistory": [link],
+			"browsingHistory": [],
 			"container": document.createElement("iframe"),
-			"latestSerial": 0,
-			"statusText": "Waiting for response..."
+			"latestSerial": -1,
+			"subText": "Waiting for response..."
 		};
 
 		// Mutate its infrastructure for detecting destination changes.
@@ -363,8 +378,8 @@ function normalizeURI(uri, realpath = "") {
 		});
 
 		// Hey, mark that one in no time!
-		FrameProperties.container.onerror = () => _changeSubtextAndFrame(editorManager.activeFile.id, FrameProperties.statusText = "Webpage is unreachable, or server error.");
-		FrameProperties.container.onload = () => _changeSubtextAndFrame(editorManager.activeFile.id, FrameProperties.statusText = "Outgoing request stopped.", true);
+		FrameProperties.container.onerror = () => (FrameProperties.subText = "Webpage is unreachable, or server error.") && factory.activeTab === FrameProperties && (editorManager.header.subText = FrameProperties.subText);
+		FrameProperties.container.onload = () => (FrameProperties.subText = "") || factory.activeTab === FrameProperties && (editorManager.header.subText = "Outgoing request stopped.");
 
 		// Configure necessary options.
 		FrameProperties.container.allow = `
@@ -415,6 +430,8 @@ function normalizeURI(uri, realpath = "") {
 			ch-preference-reduced-data;
 			xr-spatial-tracking;
 		`;
+		FrameProperties.container.allowFullscreen = true;
+		FrameProperties.container.frameBorder = 0;
 		FrameProperties.container.loading = "lazy";
 		FrameProperties.container.style.cssText = `
 			position: absolute;
@@ -428,12 +445,17 @@ function normalizeURI(uri, realpath = "") {
 		`;
 		FrameProperties.container.title = title;
 
-		// Push it inside the box if exists, yet.
-		factory.totalTabs.set(editorManager.activeFile.id, FrameProperties);
+		// Register "New Tab" properties.
+		factory.totalTabs[editorManager.activeFile.id] = FrameProperties;
+
+		// Push it inside the box.
 		editorManager.container.appendChild(FrameProperties.container);
 
 		// Prepare source request, now!
-		FrameProperties.container.src = link;
+		FrameProperties.container.src = "about:blank";
+
+		// Shortcut binding is helpful.
+		factory.activeTab = FrameProperties;
 
 		// Fix: Since "Acode" auto-switches to the tab on creation,
 		// force the IFrame to show immediately if this is the active file.
@@ -441,19 +463,19 @@ function normalizeURI(uri, realpath = "") {
 	};
 
 	// Evolved worker for executing actions related to already visited destinations.
-	function handleNavigation(cmd, props, link) {
-		if (cmd === "back" && props.latestSerial > 0) -- props.latestSerial;
-		else if (cmd === "forward" && props.latestSerial < props.browsingHistory.length - 1) ++ props.latestSerial;
+	function handleNavigation(cmd, link) {
+		if (cmd === "back" && factory.activeTab.latestSerial > 0) -- factory.activeTab.latestSerial;
+		else if (cmd === "forward" && factory.activeTab.latestSerial < factory.activeTab.browsingHistory.length - 1) ++ factory.activeTab.latestSerial;
 		else if (cmd === "go") {
-			for (let step = props.browsingHistory.length - 1; step > props.latestSerial; -- step) props.browsingHistory.pop();
-			if (link !== props.browsingHistory[props.latestSerial]) props.latestSerial = props.browsingHistory.push(link) - 1;
+			for (let step = factory.activeTab.browsingHistory.length - 1; step > factory.activeTab.latestSerial; -- step) factory.activeTab.browsingHistory.pop();
+			if (link !== factory.activeTab.browsingHistory[factory.activeTab.latestSerial]) factory.activeTab.latestSerial = factory.activeTab.browsingHistory.push(link) - 1;
 		} else console.warn("Unknown action command passed, rather doing almost nothing.");
 
 		// Fish that link.
-		const src = props.browsingHistory[props.latestSerial];
+		const src = factory.activeTab.browsingHistory[factory.activeTab.latestSerial];
 
 		// Recreate now.
-		props.container.src = generateEmbedUrl(src) || factory.domCache.proxyStatus?.checked ? factory.proxyPath + encodeURIComponent(src) : src;
+		factory.activeTab.container.src = generateEmbedUrl(src) || (factory.domCache.proxyStatus?.checked ? factory.proxyPath + encodeURIComponent(src) : src);
 	};
 
 	// Written for generating a full code piece.
@@ -474,28 +496,30 @@ function normalizeURI(uri, realpath = "") {
 					<small>${url}</small>
 				</div>
 			</div>
-			<span data-action="go" data-url="${url}" class="icon forward"></span>
-			<span data-action="delete" data-url="${url}" class="icon delete"></span>
+			<span action="go" class="icon forward"></span>
+			<span action="delete" class="icon delete"></span>
 		`;
 
+		item.setAttribute("href", url);
 		factory.domCache.sitesTileContainer.appendChild(item);
 	};
 
 	// Set-up works for circle buttons.
 	async function manageSavedSites(event) {
-		if (event.target.dataset.url && event.target.closest("span.icon")) {
-			if (event.target.dataset.action === "delete") if (await acode.confirm("WARNING", "Think at least thrice, remove this one?")) {
-				event.target.parentNode.remove();
+		const cmd = event.target.getAttribute("action"), url = event.target.parentNode.getAttribute("href");
 
-				delete factory.allSavedSites[event.target.dataset.url];
-				if (! Object.keys(factory.allSavedSites).length) {
-					factory.domCache.sitesTileContainer.style.display = "none";
-					factory.domCache.ghostText.hidden = false;
-				};
-			};
-			if (event.target.dataset.action === "go") {
-				factory.myPage.hide();
-				handleNavigation(event.target.dataset.action, factory.activeTab, factory.domCache.favicon.src = factory.domCache.addressbar.value = event.target.dataset.url);
+		if (cmd && url) if (cmd === "go") {
+			factory.domCache.addressbar.value = url;
+
+			factory.myPage.hide();
+			factory.domCache.go.click();
+		} else if (cmd === "delete" && await acode.confirm("WARNING", "Think at least thrice, remove this one?")) {
+			event.target.parentNode.remove();
+
+			delete factory.allSavedSites[url];
+			if (! Object.keys(factory.allSavedSites).length) {
+				factory.domCache.sitesTileContainer.style.display = "none";
+				factory.domCache.ghostText.hidden = false;
 			};
 		};
 	};
@@ -577,7 +601,12 @@ function normalizeURI(uri, realpath = "") {
 				this.parentNode.classList.add("public");
 			};
 			factory.domCache.go.onclick = () => {
-				handleNavigation("go", factory.activeTab, factory.domCache.favicon.src = factory.domCache.addressbar.value = normalizeURI(factory.domCache.addressbar.value) || factory.homepage.accessItem().url);
+				let baseUrl = normalizeURI(factory.domCache.addressbar.value) || factory.homepage.accessItem().url;
+
+				do baseUrl = decodeURIComponent(baseUrl.replace(factory.proxyPath, ""));
+				while (baseUrl.startsWith(factory.proxyPath));
+
+				handleNavigation("go", factory.domCache.favicon.src = factory.domCache.addressbar.value = baseUrl);
 
 				factory.domCache.back.disabled = factory.activeTab.latestSerial === 0;
 				factory.domCache.forward.disabled = factory.activeTab.latestSerial === factory.activeTab.browsingHistory.length - 1;
@@ -611,24 +640,23 @@ function normalizeURI(uri, realpath = "") {
 				let { title, url } = factory.homepage.accessItem();
 
 				if (typeof (title = await acode.prompt("Rename tab if needed:", title)) === "string") {
-					url = factory.domCache.addressbar.value = normalizeURI(factory.domCache.addressbar.value) || url;
-
-					createTab(title || "New Tab", generateEmbedUrl(url) || factory.domCache.proxyStatus?.checked ? factory.proxyPath + encodeURIComponent(url) : url);
+					createTab(title || "New Tab");
+					handleNavigation("go", factory.domCache.addressbar.value = normalizeURI(factory.domCache.addressbar.value) || url);
 					updateControlStates();
 				};
 			};
-			factory.domCache.reload.onclick = () => factory.domCache.proxyStatus.checked ? factory.activeTab.container.contentWindow.location.reload() : (() => {
-				const bustUrl = factory.activeTab.container.src;
+			factory.domCache.reload.onclick = () => {
+				let bustUrl = factory.activeTab.container.src;
 
 				// Murder, then revive.
 				factory.activeTab.container.src = "about:blank";
-				factory.activeTab.container.src = bustUrl;
-			})();
+				factory.domCache.addressbar.value = bustUrl;
+
+				factory.domCache.go.click();
+			};
 			factory.domCache.back.onclick = factory.domCache.forward.onclick = function () {
 				// Answer the pending request.
-				if (! factory.domCache.proxyStatus.checked) handleNavigation(this.dataset.action, factory.activeTab);
-				else if (this.dataset.action === "back") factory.activeTab.container.contentWindow.history.back();
-				else if (this.dataset.action === "forward") factory.activeTab.container.contentWindow.history.forward();
+				handleNavigation(this.getAttribute("action"));
 
 				factory.domCache.back.disabled = factory.activeTab.latestSerial === 0;
 				factory.domCache.forward.disabled = factory.activeTab.latestSerial === factory.activeTab.browsingHistory.length - 1;
@@ -670,24 +698,18 @@ function normalizeURI(uri, realpath = "") {
 
 		// Wanna rest? Go, get on bed.
 
-		// Shortcut binding is helpful.
-		factory.activeTab = factory.totalTabs.get(editorManager.activeFile.id);
-
 		// Restrict user to compromise smartphone health.
 		// Notice: It unlocks itself automatically, don't worry!
-		factory.domCache.add.disabled = factory.totalTabs.size >= 3;
+		factory.domCache.add.disabled = factory.totalTabs.length >= 3;
 
 		// Occupation assignment hasn't done yet.
-		if (factory.activeTab?.container) {
+		if (factory.activeTab) {
 			// Ouch, happening so repeatedly.
-			const bustUrl = factory.activeTab.browsingHistory[factory.activeTab.latestSerial];
 
-			if (! factory.domCache.addressbar.value.trim()) factory.domCache.addressbar.value = bustUrl;
-
-			factory.domCache.favicon.src = bustUrl;
+			factory.domCache.favicon.src = factory.domCache.addressbar.value = factory.activeTab.browsingHistory[factory.activeTab.latestSerial];
 			factory.domCache.go.style.visibility = "visible";
-			factory.domCache.back.disabled = factory.domCache.proxyStatus.checked ? false : factory.activeTab.latestSerial === 0;
-			factory.domCache.forward.disabled = factory.domCache.proxyStatus.checked ? false : factory.activeTab.latestSerial === factory.activeTab.browsingHistory.length - 1;
+			factory.domCache.back.disabled = factory.activeTab.latestSerial === 0;
+			factory.domCache.forward.disabled = factory.activeTab.latestSerial === factory.activeTab.browsingHistory.length - 1;
 			factory.domCache.browseCopied.disabled = factory.domCache.showSavedSites.disabled = factory.domCache.reload.disabled = factory.domCache.openBrowser.disabled = false;
 		} else {
 			// Force applying fallback icon.
@@ -738,7 +760,7 @@ function normalizeURI(uri, realpath = "") {
 		});
 
 		// Come back after winning the world, go go!
-		window.generateEmbedUrl = generateEmbedUrl;
+		window.handleNavigation = handleNavigation;
 
 		// Umm... packing bag?
 		// I really don't know, what to say now...
@@ -784,7 +806,8 @@ function normalizeURI(uri, realpath = "") {
 					const { title, url } = factory.homepage.accessItem();
 
 					hide();
-					createTab(title, url);
+					createTab(title);
+					handleNavigation("go", url);
 				};
 			});
 			container.append(header, document.createElement("br"), description, document.createElement("br"), button);
@@ -808,29 +831,36 @@ function normalizeURI(uri, realpath = "") {
 		});
 
 		// Pick up broom and side dead bodies.
-		editorManager.files.forEach(identifier => {
-			if (factory.recentTabs.accessItem()?.includes?.(identifier.id)) identifier.remove(true, {
-				"ignorePinned": true // Force close without save prompt with bypassing pinned check.
-			});
-		});
+		factory.recentTabs.accessItem()?.forEach?.(id => editorManager.files.forEach(identifier => identifier.id === id && identifier.remove(true, {
+			"ignorePinned": true // Force close without save prompt with bypassing pinned check.
+		})));
 		factory.recentTabs.removeItem();
-
-		// Equip status text, also raise if a Browser tab is opened.
-		editorManager.on("new-file", property => _changeSubtextAndFrame(property.id, result.name));
 
 		// Listen for future tab switches to show/hide sessions + start/stop panel popup watching.
 		// Fastest looking up for live tabs structure, just single passing, no extra tricks.
-		editorManager.on("switch-file", property => _changeSubtextAndFrame(property.id, result.name) && factory.totalTabs.forEach(identifier => identifier.container.style.visibility = "hidden"));
+		editorManager.on("switch-file", property => setTimeout(() => {
+			Object.keys(factory.totalTabs).forEach(identifier => factory.totalTabs[identifier].container.style.visibility = "hidden");
+
+			factory.activeTab = factory.totalTabs[property.id];
+
+			if (factory.activeTab) {
+				factory.activeTab.container.style.visibility = "visible";
+
+				// Mark it boldly, I don't care if you're gonna assume me as, very haughty...
+				if (editorManager.header.subText === "New file") editorManager.header.subText = factory.activeTab.subText || result.name;
+			};
+		}));
 
 		// None said to flex with complications, just fix memory leaking and optimize performance.
 		// Advantage: Not ours? Don't touch that = zero reflow cost.
 
 		// Clean up if the user closes our tab.
 		editorManager.on("remove-file", property => {
-			const targetTab = factory.totalTabs.get(property.id);
+			// End session automatically.
+			factory.totalTabs[property.id]?.container?.remove();
 
-			targetTab?.container.remove();
-			factory.totalTabs.delete(property.id);
+			// Unregister dead island.
+			delete factory.totalTabs[property.id];
 		});
 
 		// Shoot.
@@ -879,8 +909,8 @@ function normalizeURI(uri, realpath = "") {
 			<div class="bottom-section iframe-sidebar">
 				<button><img src="${acode.joinUrl(baseDir, "img/add.svg")}"/></button>
 				<button><img src="${acode.joinUrl(baseDir, "img/reload.svg")}"/></button>
-				<button data-action="back"><img src="${acode.joinUrl(baseDir, "img/back.svg")}"/></button>
-				<button data-action="forward"><img src="${acode.joinUrl(baseDir, "img/forward.svg")}"/></button>
+				<button action="back"><img src="${acode.joinUrl(baseDir, "img/back.svg")}"/></button>
+				<button action="forward"><img src="${acode.joinUrl(baseDir, "img/forward.svg")}"/></button>
 				<button><img src="${acode.joinUrl(baseDir, "img/external-link.svg")}"/></button>
 			</div>
 		`, false, updateControlStates);
