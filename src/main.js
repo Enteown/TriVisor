@@ -26,16 +26,16 @@ if (! ("at" in [])) Object.defineProperty(Array.prototype, "at", {
 Object.assign(document, {
 	"indexRoot": null,
 	"getElementByOrderedIndex": function (...sequence) {
-		let currentChild;
+		let childElement;
 
 		if (! (this.indexRoot instanceof Element)) throw new TypeError("Invalid DOM: expected standard element, but got: " + this.indexRoot?.constructor?.name);
 		return sequence.reduce((content, index) => {
 			// Now it can even grab itself.
 			// News: Removed legacy allowlist.
-			currentChild = content.children;
+			childElement = content.children;
 
-			if (index < 0 || index >= currentChild.length) throw new RangeError("Indexing is out of bounds, faulty argument: " + index);
-			return currentChild[index];
+			if (index < 0 || index >= childElement.length) throw new RangeError("Indexing is out of bounds, faulty argument: " + index);
+			return childElement[index];
 		}, this.indexRoot);
 	}
 });
@@ -79,7 +79,9 @@ function normalizeURI(uri, realpath = "") {
 (function () {
 	// Capture exact photocopy of all required items.
 	const factory = {
-		"domCache": {},
+		"domCache": {
+			"isDefined": false
+		},
 		"packageId": (() => {
 			// Build folder path, then cut out the name of target.
 			const parts = document.currentScript.src.split("/");
@@ -132,6 +134,7 @@ function normalizeURI(uri, realpath = "") {
 		// Hijacking plan cancelled, activating beast mode.
 		// Watcher for menu toggles.
 		_interactionWatcher = () => setTimeout(() => document.querySelector("span[data-action='sidebar-app'][data-id='" + factory.packageId + "']")?.classList.contains("active") && updateControlStates());
+
 
 	// Neither before, nor after it gets modified. So, no worries, chill out!
 	Object.defineProperty(factory.totalTabs, "length", {
@@ -197,7 +200,7 @@ function normalizeURI(uri, realpath = "") {
 			"flags": ["autoplay", "loop", "mute"],
 			"states": [factory.domCache.autoplayStatus.checked, factory.domCache.loopStatus.checked, factory.domCache.muteStatus.checked]
 		};
-		let isShortUrl, embedUrl = "", paramString = "";
+		let isShortUrl = false, embedUrl, paramString = "";
 
 		// I, hate spams.
 		if (props.pathname.includes("/embed/") || props.host.endsWith("geo.dailymotion.com") || props.host.endsWith("player.vimeo.com")) return url;
@@ -378,7 +381,7 @@ function normalizeURI(uri, realpath = "") {
 		});
 
 		// Hey, mark that one in no time!
-		FrameProperties.container.onerror = () => (FrameProperties.subText = "Webpage is unreachable, or server error.") && factory.activeTab === FrameProperties && (editorManager.header.subText = FrameProperties.subText);
+		FrameProperties.container.onerror = () => (FrameProperties.subText = "Website is unreachable, or server error.") && factory.activeTab === FrameProperties && (editorManager.header.subText = FrameProperties.subText);
 		FrameProperties.container.onload = () => (FrameProperties.subText = "") || factory.activeTab === FrameProperties && (editorManager.header.subText = "Outgoing request stopped.");
 
 		// Configure necessary options.
@@ -646,7 +649,7 @@ function normalizeURI(uri, realpath = "") {
 				};
 			};
 			factory.domCache.reload.onclick = () => {
-				let bustUrl = factory.activeTab.container.src;
+				const bustUrl = factory.activeTab.container.src;
 
 				// Murder, then revive.
 				factory.activeTab.container.src = "about:blank";
@@ -786,7 +789,7 @@ function normalizeURI(uri, realpath = "") {
 		acode.require("tutorial")("iframe-guide", hide => {
 			const container = document.createElement("div"), header = document.createElement("h3"), description = document.createElement("div"), button = document.createElement("button"), tour = {
 				"header": ["Welcome", "Tab management", "Bookmarks", "Embed support", "Limitations"],
-				"description": ["Hey buddy, thanks much for downloading. Now let me guide you, ready to go?", 'Excluding opened files, a maximum of three tabs can be added by using the <img class="demo-icon iframe-guide" src="' + acode.joinUrl(baseDir, "img/add.svg") + '"/> icon.', "Open the specific webpage in your current tab, then you may save it under a name.", "Even playing video/playlist (or music in background) is also supported. Find in YouTube mobile, then copy link and watch here alongside coding.", "Enabling cross-origin loader helps, thought dynamic sites, like Facebook is impossible to render. It's not Chrome, but still obviously great for most cases."],
+				"description": ["Hey buddy, thanks much for downloading. Ready to go?", `Excluding opened files, up to three tabs can be added using the <img class="demo-icon iframe-guide" src="${acode.joinUrl(baseDir, "img/add.svg")}"/> button.`, "Open your desired link (normally or via Proxy), then it may be saved under a name.", "Even playing video/playlist (or music in background) is also supported. Find in mobile Apps, copy link and open here to watch alongside coding.", "Enabling Proxy helps, thought dynamic sites, like Facebook is impossible to load. But still obviously it's great for most cases."],
 				"btnLabl": ["Yeah!", "Next",,, "Start browsing"],
 				"step": -1
 			};
@@ -803,11 +806,11 @@ function normalizeURI(uri, realpath = "") {
 
 				// Do you wanna end this here?
 				if (emptyFields === 3) {
-					const { title, url } = factory.homepage.accessItem();
+					// What about watching a reel? Not gonna be addictive, really, see:
 
 					hide();
-					createTab(title);
-					handleNavigation("go", url);
+					createTab("User Guide");
+					handleNavigation("go", "https://m.youtube.com/shorts/vrxlJQXv-5A");
 				};
 			});
 			container.append(header, document.createElement("br"), description, document.createElement("br"), button);
