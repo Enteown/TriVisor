@@ -11,7 +11,7 @@ __A mini, but useful extension built to fold cross-origin navigation.__
 ## __Installation__
 __Launch Acode, open Extensions panel and search for *TriVisor IFrame Browser*, then install it.__
 
-- __Watch tutorial before use:__ <a target="_blank" href="https://www.youtube.com/shorts/vrxlJQXv-5A?si=KSWbSSuUt-R0cMEI"><sub><sub><img src="https://img.shields.io/badge/YouTube-%23FF0000.svg?logo=YouTube&logoColor=white"/></sub></sub></a>
+- __Watch tutorial before use:__ <a target="_blank" href="https://m.youtube.com/shorts/vrxlJQXv-5A"><sub><sub><img src="https://img.shields.io/badge/YouTube-%23FF0000.svg?logo=YouTube&logoColor=white"/></sub></sub></a>
 
 ## __Wanna help?__
 __Still, there are a huge quantity of embeddable websites that we lacked to support in our plug-in, you can add one of them, for the community.__
