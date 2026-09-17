@@ -198,7 +198,7 @@ function normalizeURI(uri, realpath = "") {
 	function generateEmbedUrl(url) {
 		const props = new URL(url), knownParams = new URLSearchParams(), currentTheme = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light", playerConfigHardcoded = {
 			"flags": ["autoplay", "loop", "mute"],
-			"states": [factory.domCache.autoplayStatus.checked, factory.domCache.loopStatus.checked, factory.domCache.muteStatus.checked]
+			"states": [factory.domCache.autoplayStatus?.checked, factory.domCache.loopStatus?.checked, factory.domCache.muteStatus?.checked]
 		};
 		let isShortUrl = false, embedUrl, paramString = "";
 
@@ -351,7 +351,7 @@ function normalizeURI(uri, realpath = "") {
 		} else return "";
 
 		// But don't skip anything we've to achieve interactivity.
-		playerConfigHardcoded.flags?.forEach((key, index) => key && knownParams.append(key, Number(playerConfigHardcoded.states[index])));
+		playerConfigHardcoded.flags?.forEach((key, index) => key && knownParams.append(key, Number(playerConfigHardcoded.states[index] ?? false)));
 
 		// Forth, append extra parts if exist.
 		if (knownParams.size) paramString = "?" + knownParams.toString();
