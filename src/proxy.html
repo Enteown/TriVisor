@@ -60,58 +60,181 @@
 			// Mimic a real example.
 			navigator.userAgentData.brands.forEach(data => headers.append("Sec-Ch-Ua", '"' + data.brand + '";v="' + data.version + '"'));
 
+			// Really? Yep, really!
+			console = top.console; // For, "Eruda"
+
+			// I'm your new, beautiful maid, sir if you need me!
+			if (! ("canParse" in URL)) URL.canParse = function canParse(uri, base) {
+				try {
+					new URL(uri, base);
+					return true;
+				} catch {
+					// The ultimate solution.
+					return false;
+				};
+			};
+
 			// Doppelganger guys, yahh!
 			function fetch(init = "", options) {
 				if (! (options?.constructor?.name === "Object" || options instanceof Request)) options = {};
 				if (! (typeof init === "string" || init instanceof Request)) init = String(init);
-				if (typeof init === "string") try {
-					// We can't force you.
-					new URL(init);
-				} catch {
-					// But of course can guide you.
-					init = top.acode.joinUrl(url.origin, init);
+				if (typeof init === "string") if (! URL.canParse(init)) init = top.acode.joinUrl(url.origin, init); // Not gonna force, but of course wanna guide you.
+
+				const req = new Request(init, options), base = new URL(req.url), setsrc = (metadata, response) => {
+					Object.defineProperty(metadata, "redirected", {
+						"value": base.origin + base.pathname === response.url.match(/^([^?#]+)/)[0],
+						"enumerable": true,
+						"configurable": true
+					});
+					Object.defineProperty(metadata, "url", {
+						"value": response.url,
+						"enumerable": true,
+						"configurable": true
+					});
 				};
 
-				const req = new Request(init, options), plainHObject = {}, setUrl = (metadata, response) => Object.defineProperty(metadata, "url", {
-					"value": response.url,
-					"enumerable": true,
-					"configurable": true
-				});
-				let message, isPending = true;
-
-				return new Promise((resolve, reject) => {
-					req.signal.addEventListener("abort", event => isPending && reject(event.target.reason), {
+				return new Promise(async (resolve, reject) => {
+					if (req.credentials !== "same-origin" && req.credentials !== "omit" && req.credentials !== "include") return reject(new DOMException("Invalid cookies sender configuration value got, request can't be proceeded.", "FetchError"));
+					if (req.method !== "GET" && req.method !== "POST" && req.method !== "PUT" && req.method !== "PATCH" && req.method !== "DELETE" && req.method !== "HEAD" && req.method !== "OPTIONS") return reject(new DOMException("That request type isn't supported, yet.", "FetchError"));
+					if (req.redirect !== "follow" && req.redirect !== "manual" && req.redirect !== "error") return reject(new DOMException("Invalid redirection command given, stopped outgoing request.", "FetchError"));
+					if (req.signal.aborted) return reject(new DOMException("Signal is already broken, making request to server isn't permitted.", "AbortError"));
+					else req.signal.addEventListener("abort", event => {
+						// Hey, fr?
+						let cancelled = false;
+						// "Divine Flame"!
+						top.cordova.plugin.http.abort(requestId, signal => (cancelled = signal.aborted), report => {
+							top.toast("Error Code: " + report.status);
+							console.error(new DOMException(report.error, "AbortError"));
+						});
+						// Byee, go die.
+						if (cancelled) reject(event.target.reason);
+					}, {
 						"once": true
 					});
 
-					if (req.signal.aborted) reject(new DOMException("Signal is already broken, making request to server isn't permitted.", "AbortError"));
-					if (req.credentials !== "same-origin" && req.credentials !== "omit" && req.credentials !== "include") reject(new DOMException("Invalid credential sender configuration value got, request can't be proceeded.", "FetchError"));
-					if (req.method !== "GET" && req.method !== "POST" && req.method !== "PUT" && req.method !== "PATCH" && req.method !== "DELETE" && req.method !== "HEAD" && req.method !== "OPTIONS") reject(new DOMException("That request method isn't supported, yet.", "FetchError"));
+					const plainHObject = {};
+					let data = {}, serializer = "json", requestId;
 
 					req.headers.forEach((value, key) => plainHObject[key] = value);
 					headers.forEach((value, key) => plainHObject[key] = value);
 
-					top.cordova.plugin.http.sendRequest(req.url, {
+					if ((req.credentials === "same-origin" && base.origin !== url.origin) || req.credentials === "omit") plainHObject["Cookie"] = "";
+					if (req.body !== null && req.body !== void 0) if (req.body instanceof FormData) {
+						data = req.body;
+						serializer = "multipart";
+					} else if (req.body instanceof ReadableStream) {
+						const reader = req.body.getReader(), chunks = [];
+						let totalLength = 0;
+
+						while (true) {
+							const { done, value } = await reader.read();
+
+							if (done) break;
+
+							// Probably, a little piece:
+							chunks.push(value);
+							totalLength += value.byteLength;
+						};
+
+						// Merging all chunks to a single one:
+						const resultBuffer = new Uint8Array(totalLength);
+						let offset = 0;
+
+						for (const chunk of chunks) {
+							resultBuffer.set(chunk, offset);
+							offset += chunk.byteLength;
+						};
+
+						data = resultBuffer.buffer;
+						serializer = "raw";
+					} else if (req.body instanceof Blob || req.body instanceof File) {
+						data = await req.body.arrayBuffer();
+						serializer = "raw";
+						plainHObject["Content-Type"] = req.body.type || "application/octet-stream";
+					} else if (req.body instanceof ArrayBuffer) {
+						data = req.body;
+						serializer = "raw";
+					} else if (ArrayBuffer.isView(req.body)) {
+						data = req.body.buffer; // Send underneath informations.
+						serializer = "raw";
+					} else if (req.body instanceof URLSearchParams) {
+						const params = {};
+
+						req.body.forEach((value, key) => params[key] = value);
+
+						data = params;
+						serializer = "urlencoded";
+					} else if (typeof req.body === "string") {
+						data = req.body;
+						serializer = "utf8";
+					} else if (typeof req.body === "object") data = req.body;
+
+					// Wire up the mask:
+					requestId = top.cordova.plugin.http.sendRequest(base.origin + base.pathname, {
 						"method": req.method.toLowerCase(),
+						"data": data,
+						"params": Object.fromEntries(base.searchParams),
+						"serializer": serializer,
 						"responseType": "arraybuffer",
-						"followRedirect": true,
+						"timeout": 31536000, // Set global limit, "one year"! Bro, enough for a breakthrough.
+						"followRedirect": req.redirect === "follow",
 						"headers": plainHObject
 					}, response => {
-						isPending = false;
+						const algoStrength = {
+							// Priority Level:
+							"sha-256": 1,
+							"sha-384": 2,
+							"sha-512": 3
+							// Yep, right point. Only those three.
+						};
+						let hashCalculated, tokens = [], bestToken = null, bestStrength = 0;
+
+						// 1. Differentiate parts by whitespaces among them:
+						if (req.integrity) tokens = req.integrity.trim().split(/\s+/);
+
+						// 2. Select one from the strongest, most powerful algorithm:
+						for (const token of tokens) {
+							const cMatch = token.match(/^(sha-256|sha-384|sha-512)-([A-Za-z0-9+/=]+)$/);
+
+							// Format didn't matched? (If unknown.) Skip it, with no time!
+							if (! cMatch) continue;
+
+							const algo = cMatch[1];
+
+							// Upgrade if supported till the last one.
+							if (algoStrength[algo] > bestStrength) {
+								bestStrength = algoStrength[algo];
+								bestToken = {
+									"algo": algo.toUpperCase(),
+									"expectedHash": cMatch[2]
+								};
+							};
+						};
+
+						// Ha ha haa...
+						// 3. Dynamically generate hash using built-in, "Web Crypto API":
+						if (bestToken) crypto.subtle.digest(bestToken.algo, response.data).then(hashBuffer => hashCalculated = btoa(String.fromCharCode(...new Uint8Array(hashBuffer)))); // 4. And right after that, convert it to Base-64 string data.
+						else if (req.integrity) return reject(new TypeError("SRI check failure: invalid attribute value."));
+
+						while (req.integrity) {
+							if (! hashCalculated) continue; // Hold lock until master key arrives.
+							if (hashCalculated !== bestToken.expectedHash) return reject(new TypeError("SRI check failure: value not matched.")); // 5. Match fingerprint.
+							break;
+						};
 
 						const metadata = new Response(response.data, {
 							"headers": new Headers(response.headers),
-							"status": response.status
+							"status": response.status,
+							"statusText": "OK"
 						});
 
-						setUrl(metadata, response);
+						setsrc(metadata, response);
 						resolve(metadata);
 					}, response => {
-						isPending = false;
-
 						if (response.status < 0) {
 							// It's an internal software/network error.
 							const code = top.cordova.plugin.http.ErrorCode;
+							let message;
 
 							switch (response.status) {
 								case code.SSL_EXCEPTION:
@@ -136,7 +259,7 @@
 								"statusText": response.error
 							});
 
-							setUrl(metadata, response);
+							setsrc(metadata, response);
 							resolve(metadata);
 						};
 					});
@@ -159,30 +282,40 @@
 
 					// Extract the text encoding using a regular expression.
 					charset = ctHeader.match(/charset=([^;]+)/i)?.[1];
-				let myData, txtType;
+				let data, isText = false;
 
-				if (mimetype.startsWith("text/") || txtMTypes.some(item => mimetype.endsWith(item))) {
-					myData = new TextDecoder(charset).decode(await response.arrayBuffer()); // Safely decode by the correct text encoding.
-					txtType = mimetype.endsWith("html") || mimetype.endsWith("xml") ? "source" : "plain";
-				};
+				if ((mimetype.startsWith("text/") || txtMTypes.some(item => mimetype.endsWith(item))) && (isText = true)) data = new TextDecoder(charset).decode(await response.arrayBuffer()); // Safely decode by the correct text encoding.
 
 				// Way to go now!
-				return {
-					mimetype,
-					txtType,
-					myData
-				};
+				return { data, isText, mimetype };
 			}).then(result => {
-				if (result.txtType === "source") {
-					const DOMContent = new DOMParser().parseFromString(result.myData, result.mimetype);
-					let snatchedDocTypeNode = document.implementation.createDocumentType("html", "", ""), foundExisting;
+				const { data, isText, mimetype } = result;
 
-					if (DOMContent.doctype) {
-						snatchedDocTypeNode = document.adoptNode(DOMContent.doctype);
-						foundExisting = true;
+				if (isText) if (mimetype.endsWith("html") || mimetype.endsWith("xml")) {
+					const DOMContent = new DOMParser().parseFromString(data, mimetype);
+					let DocTypeNode, base = DOMContent.querySelector("head base");
+
+					if (DOMContent.doctype) DocTypeNode = document.adoptNode(DOMContent.doctype); // Snatch the existing document type declaration.
+					else DocTypeNode = document.implementation.createDocumentType("html", "", "");
+					if (document.doctype) document.replaceChild(DocTypeNode, document.doctype);
+					else document.insertBefore(DocTypeNode, document.firstChild);
+
+					// Make relative links working:
+					if (base) {
+						if (! base.href) base.href = url.origin + "/";
+						if (! URL.canParse(base.href)) {
+							if (base.href.startsWith("/")) base.href = url.origin + base.href;
+							else base.href = top.acode.joinUrl(url.origin + "/", top.acode.joinUrl(url.pathname, ".."), base.href);
+						};
+						if (! base.href.endsWith("/")) base.href += "/";
+					} else {
+						// 0. Pick up ingredients:
+						base = document.createElement("base");
+						// 1. Getting ready:
+						base.href = url.origin + "/"; // Nasty trailing character, for broken rules.
+						// 2. Get started:
+						DOMContent.head.prepend(base);
 					};
-					if (foundExisting) if (document.doctype) document.replaceChild(snatchedDocTypeNode, document.doctype);
-					if (! document.doctype) document.insertBefore(snatchedDocTypeNode, document.firstChild);
 
 					// Wohoo!
 					document.write(DOMContent.documentElement.outerHTML);
@@ -193,7 +326,7 @@
 				reporter.children[4].value = error.message;
 				reporter.classList.value = "";
 
-				// I really, have no hope... of going there ever:
+				// Heh, no way I'll see you someday:
 				throw new TypeError("Failed to fetch");
 			});
 		</script>

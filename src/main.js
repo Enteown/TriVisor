@@ -80,7 +80,7 @@ function normalizeURI(uri, realpath = "") {
 	// Capture exact photocopy of all required items.
 	const factory = {
 		"domCache": {
-			"isDefined": false
+			"defined": false
 		},
 		"packageId": (() => {
 			// Build folder path, then cut out the name of target.
@@ -466,10 +466,10 @@ function normalizeURI(uri, realpath = "") {
 	};
 
 	// Evolved worker for executing actions related to already visited destinations.
-	function handleNavigation(cmd, link) {
-		if (cmd === "back" && factory.activeTab.latestSerial > 0) -- factory.activeTab.latestSerial;
-		else if (cmd === "forward" && factory.activeTab.latestSerial < factory.activeTab.browsingHistory.length - 1) ++ factory.activeTab.latestSerial;
-		else if (cmd === "go") {
+	function handleNavigation(command, link) {
+		if (command === "back" && factory.activeTab.latestSerial > 0) -- factory.activeTab.latestSerial;
+		else if (command === "forward" && factory.activeTab.latestSerial < factory.activeTab.browsingHistory.length - 1) ++ factory.activeTab.latestSerial;
+		else if (command === "go") {
 			for (let step = factory.activeTab.browsingHistory.length - 1; step > factory.activeTab.latestSerial; -- step) factory.activeTab.browsingHistory.pop();
 			if (link !== factory.activeTab.browsingHistory[factory.activeTab.latestSerial]) factory.activeTab.latestSerial = factory.activeTab.browsingHistory.push(link) - 1;
 		} else console.warn("Unknown action command passed, rather doing almost nothing.");
@@ -509,14 +509,14 @@ function normalizeURI(uri, realpath = "") {
 
 	// Set-up works for circle buttons.
 	async function manageSavedSites(event) {
-		const cmd = event.target.getAttribute("action"), url = event.target.parentNode.getAttribute("href");
+		const command = event.target.getAttribute("action"), url = event.target.parentNode.getAttribute("href");
 
-		if (cmd && url) if (cmd === "go") {
+		if (command && url) if (command === "go") {
 			factory.domCache.addressbar.value = url;
 
 			factory.myPage.hide();
 			factory.domCache.go.click();
-		} else if (cmd === "delete" && await acode.confirm("WARNING", "Think at least thrice, remove this one?")) {
+		} else if (command === "delete" && await acode.confirm("WARNING", "Think at least thrice, remove this one?")) {
 			event.target.parentNode.remove();
 
 			delete factory.allSavedSites[url];
@@ -530,7 +530,7 @@ function normalizeURI(uri, realpath = "") {
 	// Everytime this panel must be updated when we need it.
 	function updateControlStates(container) {
 		// Tactics died, huh... We're implementing our old techniques.
-		if (! factory.domCache.isDefined) {
+		if (! factory.domCache.defined) {
 			// Hook a shortcut for walking less.
 			document.indexRoot = container;
 
@@ -687,7 +687,7 @@ function normalizeURI(uri, realpath = "") {
 			});
 
 			// I'm lonely.
-			factory.domCache.isDefined = true;
+			factory.domCache.defined = true;
 
 			// More than you I'm.
 			for (const url in factory.allSavedSites) insertSavedSitesTile(factory.allSavedSites[url], url);
@@ -938,7 +938,7 @@ function normalizeURI(uri, realpath = "") {
 		factory.myPage.removeEventListener("click", manageSavedSites);
 
 		// Strike down temporarily for next launch.
-		factory.domCache.isDefined = false;
+		factory.domCache.defined = false;
 	});
 
 	// Yo, polishing completed. And in bonus, electron saver version is ready.
