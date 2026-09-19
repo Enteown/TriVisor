@@ -28,7 +28,7 @@ __Currently available:__
 - __Vimeo__
 - __YouTube__
 
-__Also our Proxy (better call it a site scrapper) is very basic, which need more upgrades.__
+__Also our Proxy (better call it a *Site Scrapper*) is very basic, which need more upgrades.__
 
 > [!WARNING]
 > __Obtaining special permissions (like camera or microphone) here is simply impossible.__
