@@ -299,17 +299,14 @@
 
 				// Way to go now!
 				return { data, isText, mimetype };
-			}).then(result => {
+			}).then(async result => {
 				const { data, isText, mimetype } = result;
 
 				if (isText) if (mimetype.endsWith("html") || mimetype.endsWith("xml")) {
 					const DOMContent = new DOMParser().parseFromString(data, mimetype);
-					let DocTypeNode, base = DOMContent.querySelector("head base");
+					let base = DOMContent.querySelector("head base");
 
-					if (DOMContent.doctype) DocTypeNode = document.adoptNode(DOMContent.doctype); // Snatch the existing document type declaration.
-					else DocTypeNode = document.implementation.createDocumentType("html", "", "");
-					if (document.doctype) document.replaceChild(DocTypeNode, document.doctype);
-					else document.insertBefore(DocTypeNode, document.firstChild);
+					if (DOMContent.doctype) document.replaceChild(document.adoptNode(DOMContent.doctype), document.doctype); // Snatch the existing document type declaration.
 
 					// Make relative links working:
 					if (base) {
@@ -329,20 +326,35 @@
 					};
 
 					// Make absolute links working:
-					DOMContent.querySelectorAll("link, script, video").forEach(props => {
+					DOMContent.querySelectorAll("link, script, img, video, audio").forEach(props => {
 						if (props instanceof HTMLLinkElement && ! props.href.startsWith("//") && props.href.startsWith("/")) props.href = url.origin + props.href;
 						else if ((props instanceof HTMLScriptElement || props instanceof HTMLImageElement || props instanceof HTMLVideoElement || props instanceof HTMLAudioElement) && ! props.src.startsWith("//") && props.src.startsWith("/")) props.src = url.origin + props.src;
 					});
 
 					// Wohoo!
 					document.write(DOMContent.documentElement.outerHTML);
-				};
+				} else {
+					// I stop now, can't work for free anymore on it:
+					const fname = await top.acode.prompt("Put a file name before opening:", "Untitled");
+
+					// Todo: We'll add syntax highlights by using, "PrismJS" project, in future.
+					// Hey, it's not even beginning, the idea can be significantly upgraded!
+					if (fname) top.acode.newEditorFile(fname, {
+						"isUnsaved": true,
+						"text": data,
+						"editable": true,
+						"deletedFile": false
+					});
+					else throw new Error("User cancelled action to view raw text contents.");
+				} else throw new Error("Received data is binary, can't be opened for now.");
 			}).catch(error => {
 				// Capture reporter under our target.
 				top.document.indexRoot = document.body;
 				// Assign default settings to it.
 				top.document.getElementByOrderedIndex(0, 4).value = error.message;
 				top.document.getElementByOrderedIndex(0).classList.value = "";
+				// Leave that for future use.
+				top.document.indexRoot = null;
 			});
 		</script>
 	</body>

@@ -1,6 +1,6 @@
 // Please, beware skidding without understanding the concept.
 // Here, is the basement of machinery, stepping into it.
-// @Todo: Finally, pause development (Sun, Sep 6)
+// Notice: Finally, pause development (Sun, Sep 6)
 
 
 
