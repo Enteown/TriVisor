@@ -187,7 +187,7 @@
 							"sha-512": 3
 							// Yep, right point. Only those three.
 						};
-						let hashCalculated, tokens = [], bestToken = null, bestStrength = 0;
+						let hashCalculated, tokens = [], bestToken = null, bestStrength = 0, vfLockSerial;
 
 						// 1. Differentiate parts by whitespaces among them:
 						if (req.integrity) tokens = req.integrity.trim().split(/\s+/);
@@ -213,23 +213,28 @@
 
 						// Ha ha haa...
 						// 3. Dynamically generate hash using built-in, "Web Crypto API":
-						if (bestToken) crypto.subtle.digest(bestToken.algo, response.data).then(hashBuffer => hashCalculated = btoa(String.fromCharCode(...new Uint8Array(hashBuffer)))); // 4. And right after that, convert it to Base-64 string data.
+						if (bestToken) crypto.subtle.digest(bestToken.algo, response.data).then(hashBuffer => hashCalculated = btoa(Array.from(new Uint8Array(hashBuffer)).map(byte => String.fromCharCode(byte)).join(""))); // 4. And right after that, convert it to Base-64 string data. (Removed spreading technique, because it has an drawback with large files.)
 						else if (req.integrity) return reject(new TypeError("SRI check failure: invalid attribute value."));
 
-						while (req.integrity) {
-							if (! hashCalculated) continue; // Hold lock until master key arrives.
-							if (hashCalculated !== bestToken.expectedHash) return reject(new TypeError("SRI check failure: value not matched.")); // 5. Match fingerprint.
-							break;
-						};
+						vfLockSerial = setInterval(() => {
+							if (req.integrity) {
+								if (! hashCalculated) return; // Hold lock until master key arrives.
+								if (hashCalculated !== bestToken.expectedHash) {
+									clearInterval(vfLockSerial);
+									return reject(new TypeError("SRI check failure: value not matched.")); // 5. Match fingerprint.
+								};
+							};
 
-						const metadata = new Response(response.data, {
-							"headers": new Headers(response.headers),
-							"status": response.status,
-							"statusText": "OK"
+							const metadata = new Response(response.data, {
+								"headers": new Headers(response.headers),
+								"status": response.status,
+								"statusText": "OK"
+							});
+
+							clearInterval(vfLockSerial);
+							setsrc(metadata, response);
+							resolve(metadata);
 						});
-
-						setsrc(metadata, response);
-						resolve(metadata);
 					}, response => {
 						if (response.status < 0) {
 							// It's an internal software/network error.
@@ -239,16 +244,22 @@
 							switch (response.status) {
 								case code.SSL_EXCEPTION:
 									message = "SSL handshake failure, invalid certificate, or untrusted host.";
+									break;
 								case code.SERVER_NOT_FOUND:
 									message = "Hostname could not be resolved (DNS failure).";
+									break;
 								case code.UNSUPPORTED_URL:
 									message = "The URL protocol schema is malformed or unsupported.";
+									break;
 								case code.NOT_CONNECTED:
 									message = "The device has no active internet connection.";
+									break;
 								case code.POST_PROCESSING_FAILED:
 									message = "Failed to parse data (e.g., unexpected JSON token formatting).";
+									break;
 								default:
 									message = "An unregistered Cordova (internal) plug-in error occurred.";
+									break;
 							};
 
 							reject(new DOMException(message, "FetchError"));
@@ -317,17 +328,21 @@
 						DOMContent.head.prepend(base);
 					};
 
+					// Make absolute links working:
+					DOMContent.querySelectorAll("link, script, video").forEach(props => {
+						if (props instanceof HTMLLinkElement && ! props.href.startsWith("//") && props.href.startsWith("/")) props.href = url.origin + props.href;
+						else if ((props instanceof HTMLScriptElement || props instanceof HTMLImageElement || props instanceof HTMLVideoElement || props instanceof HTMLAudioElement) && ! props.src.startsWith("//") && props.src.startsWith("/")) props.src = url.origin + props.src;
+					});
+
 					// Wohoo!
 					document.write(DOMContent.documentElement.outerHTML);
 				};
 			}).catch(error => {
-				const reporter = document.body.children[0];
-
-				reporter.children[4].value = error.message;
-				reporter.classList.value = "";
-
-				// Heh, no way I'll see you someday:
-				throw new TypeError("Failed to fetch");
+				// Capture reporter under our target.
+				top.document.indexRoot = document.body;
+				// Assign default settings to it.
+				top.document.getElementByOrderedIndex(0, 4).value = error.message;
+				top.document.getElementByOrderedIndex(0).classList.value = "";
 			});
 		</script>
 	</body>

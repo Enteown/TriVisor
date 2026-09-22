@@ -145,9 +145,10 @@ div.bottom-section.iframe-sidebar > button {
 /* Do us a favour? Kindly gain control over their gap size, plus beautify. If anyone can, okay! */
 div.bottom-section.iframe-sidebar > button > img {
 	position: relative;
-	width: 16px;
-	height: 16px;
-	top: 2px;
+	width: 18px;
+	height: 18px;
+	top: 1.5px;
+	left: 0.125px;
 }
 div.segmented-control.iframe-page {
 	text-align: center;

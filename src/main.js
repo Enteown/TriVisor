@@ -26,9 +26,10 @@ if (! ("at" in [])) Object.defineProperty(Array.prototype, "at", {
 Object.assign(document, {
 	"indexRoot": null,
 	"getElementByOrderedIndex": function (...sequence) {
+		const voidTags = ["area", "base", "basefont", "bgsound", "br", "col", "command", "embed", "frame", "hr", "img", "input", "isindex", "keygen", "link", "meta", "param", "source", "track", "wbr"];
 		let childElement;
 
-		if (! (this.indexRoot instanceof Element)) throw new TypeError("Invalid DOM: expected standard element, but got: " + this.indexRoot?.constructor?.name);
+		if (this.indexRoot?.nodeType !== Node.ELEMENT_NODE || voidTags.includes(this.indexRoot.tagName.toLowerCase())) throw new TypeError("Invalid DOM: expected standard (not auto-closing tags) element, but got: " + this.indexRoot?.constructor?.name);
 		return sequence.reduce((content, index) => {
 			// Now it can even grab itself.
 			// News: Removed legacy allowlist.
@@ -372,6 +373,7 @@ function normalizeURI(uri, realpath = "") {
 
 		// Mutate its infrastructure for detecting destination changes.
 		// Removed: As our "History saving strategy" has been rewritten completely, in 3 hours 15 minutes, nevermind.
+		if (factory.domCache.frameSandboxing?.checked) FrameProperties.container.sandbox = "allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-presentation allow-same-origin allow-scripts"; // Explicitly say to invite internal instructions.
 
 		// Create a dummy "New File" tab handle.
 		acode.newEditorFile(title, {
@@ -546,6 +548,7 @@ function normalizeURI(uri, realpath = "") {
 				"autoplayStatus": document.getElementByOrderedIndex(7, 1, 1, 0),
 				"muteStatus": document.getElementByOrderedIndex(7, 2, 1, 0),
 				"loopStatus": document.getElementByOrderedIndex(7, 3, 1, 0),
+				"frameSandboxing": document.getElementByOrderedIndex(7, 4, 1, 0),
 				"add": document.getElementByOrderedIndex(8, 0),
 				"reload": document.getElementByOrderedIndex(8, 1),
 				"back": document.getElementByOrderedIndex(8, 2),
@@ -592,6 +595,7 @@ function normalizeURI(uri, realpath = "") {
 			factory.domCache.autoplayStatus.accessItem = $config("autoplayVideos", true).accessItem;
 			factory.domCache.muteStatus.accessItem = $config("startMute", true).accessItem;
 			factory.domCache.loopStatus.accessItem = $config("loopPlaylist", true).accessItem;
+			factory.domCache.frameSandboxing.accessItem = $config("frameSandboxing", true).accessItem;
 
 			// Watcher for action management.
 			factory.myPage.addEventListener("click", manageSavedSites);
@@ -639,6 +643,7 @@ function normalizeURI(uri, realpath = "") {
 			factory.domCache.autoplayStatus.onchange = event => factory.domCache.autoplayStatus.accessItem(event.target.checked);
 			factory.domCache.muteStatus.onchange = event => factory.domCache.muteStatus.accessItem(event.target.checked);
 			factory.domCache.loopStatus.onchange = event => factory.domCache.loopStatus.accessItem(event.target.checked);
+			factory.domCache.frameSandboxing.onchange = event => factory.domCache.frameSandboxing.accessItem(event.target.checked);
 			factory.domCache.add.onclick = async () => {
 				let { title, url } = factory.homepage.accessItem();
 
@@ -903,6 +908,13 @@ function normalizeURI(uri, realpath = "") {
 				</div>
 				<div>
 					<span>Loop playlist</span>
+					<label class="switch">
+						<input type="checkbox"/>
+						<span class="slider"></span>
+					</label>
+				</div>
+				<div>
+					<span>Frame sandboxing</span>
 					<label class="switch">
 						<input type="checkbox"/>
 						<span class="slider"></span>
