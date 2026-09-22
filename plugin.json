@@ -1,7 +1,7 @@
 {
 	"id": "null.plugin.iframe",
 	"name": "TriVisor IFrame Browser",
-	"version": "1.1.6",
+	"version": "1.1.7",
 	"icon": "img/icon.png",
 	"main": "src/main.js",
 	"changelogs": "CHANGELOG.md",
