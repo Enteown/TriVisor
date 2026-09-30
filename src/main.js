@@ -593,7 +593,7 @@ function normalizeURI(uri, realpath = "") {
 			// Hmm, walk inside.
 			factory.domCache.proxyStatus.accessItem = $config("proxyEnabled", true).accessItem;
 			factory.domCache.autoplayStatus.accessItem = $config("autoplayVideos", true).accessItem;
-			factory.domCache.muteStatus.accessItem = $config("startMute", true).accessItem;
+			factory.domCache.muteStatus.accessItem = $config("startMuted", true).accessItem;
 			factory.domCache.loopStatus.accessItem = $config("loopPlaylist", true).accessItem;
 			factory.domCache.frameSandboxing.accessItem = $config("frameSandboxing", true).accessItem;
 
