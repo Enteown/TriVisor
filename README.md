@@ -4,7 +4,7 @@ __A mini, but useful extension built to fold cross-origin navigation.__
 
 ## __Preview__
 
-<div align="center"><video controls width="240" height="432" src="https://www.github.com/Enteown/Enteown/raw/refs/heads/master/Videos/Plug-in%20usage%20tutorial%20for%20Acode%20_%20TriVisor%20IFrame%20Browser.mp4"/></div>
+<div align="center"><video controls width="240" height="432" src="https://github.com/user-attachments/assets/e816b5b6-9588-4471-980a-e1efbbf483fc"><p align="center">Failed rendering the built-in player.</p></video></div>
 <br/>
 
 > [!NOTE]
